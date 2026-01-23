@@ -1,0 +1,16 @@
+[project]
+name = "ComfyUI-QwenTTS"
+description = "ComfyUI custom nodes for speech, voice cloning, and voice design based on Qwen3-TTS models"
+version = "0.0.1"
+license = {file = "LICENSE"}
+
+dependencies = []
+    
+[project.urls]
+Repository = "https://github.com/1038lab/ComfyUI-QwenTTS"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "ailab"
+DisplayName = "ComfyUI-QwenTTS"
+Icon = ""
