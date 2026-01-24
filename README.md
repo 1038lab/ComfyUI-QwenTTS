@@ -32,18 +32,58 @@ A clean, efficient ComfyUI custom node pack for **Qwen3-TTS**. It provides **Cus
 
 ## Installation
 
-### Method 1: ComfyUI Manager (Recommended)
+### Method 1: ComfyUI-Manager (Recommended)
 Open ComfyUI Manager → search **ComfyUI-QwenTTS** → install.
 
-### Method 2: Manual Installation
+Install requirements in the ComfyUI-QwenTTS folder:
+```bash
+./ComfyUI/python_embeded/python -m pip install -r requirements.txt
+```
+
+> [!TIP]
+>  If your environment cannot install dependencies with the system Python, use ComfyUI’s embedded Python instead:
+> `./ComfyUI/python_embeded/python.exe -m pip install --no-user --no-cache-dir -r requirements.txt`
+
+### Method 2: Clone into custom_nodes
 ```bash
 cd ComfyUI/custom_nodes
-
-git clone https://github.com/1038lab/ComfyUI-QwenTTS.git
-cd ComfyUI-QwenTTS
-pip install -r requirements.txt
+git clone https://github.com/1038lab/ComfyUI-QwenTTS
 ```
+
+Install requirements in the ComfyUI-QwenTTS folder:
+```bash
+./ComfyUI/python_embeded/python -m pip install -r requirements.txt
+```
+
+### Method 3: Comfy CLI
+Make sure Comfy CLI is installed:
+```bash
+pip install comfy-cli
+```
+
+Install the node:
+```bash
+comfy node install ComfyUI-QwenTTS
+```
+
+Install requirements in the ComfyUI-QwenTTS folder:
+```bash
+./ComfyUI/python_embeded/python -m pip install -r requirements.txt
+```
+
 Restart ComfyUI after installation.
+
+### Optional: FlashAttention 2 (Speed Up on CUDA)
+
+If you have a compatible NVIDIA GPU, FlashAttention 2 can improve speed.
+
+```bash
+pip install flash-attn --no-build-isolation
+```
+
+> [!NOTE]
+> Requires CUDA and `torch` built with a compatible CUDA version.
+> Only works with `fp16`/`bf16` precision.
 
 ## Dependencies
 
@@ -70,6 +110,20 @@ Supported model IDs (Hugging Face):
 - [Qwen/Qwen3-TTS-Tokenizer-12Hz](https://huggingface.co/Qwen/Qwen3-TTS-Tokenizer-12Hz)
 
 If a model is missing locally, it will be downloaded automatically on first use.
+
+### Model Folder Policy
+
+All Qwen3-TTS assets are stored in one consistent location:
+```
+ComfyUI/models/TTS/Qwen3-TTS/<MODEL_NAME>/
+```
+This node will not download or create model folders elsewhere.
+
+### Why So Many Files?
+
+Qwen3-TTS follows the standard Hugging Face model layout (config, tokenizer, weights, etc.).
+Multiple JSON/config files are required by Transformers at runtime, so they cannot be safely
+collapsed into a single file without breaking loading.
 
 ### Manual Download (Recommended for Slow/Blocked Networks)
 
@@ -199,23 +253,13 @@ Note: `mps` is only available on macOS (Apple Silicon).
 - Use clean reference audio (5–15 seconds) for cloning.
 - Basic nodes default to `do_sample=False` for faster, more stable output.
 
-## FlashAttention (Optional)
-
-If you have a compatible NVIDIA GPU, FlashAttention 2 can improve speed.
-
-```bash
-pip install flash-attn --no-build-isolation
-```
-
-Notes:
-- Requires CUDA and `torch` built with a compatible CUDA version.
-- Only works with `fp16`/`bf16` precision.
-
 ## Troubleshooting
 
 - **Model download fails**: Check network or disk space, or download manually.
+- **Dependency conflicts**: Use the pinned `huggingface_hub` range in `requirements.txt`. If your ComfyUI environment already has newer packages, install into a clean venv.
 - **Out of memory**: Lower `max_new_tokens` or switch to CPU.
 - **Clone quality**: Ensure reference text is accurate.
+- **RAM warnings**: Some notes online refer to compiling FlashAttention from source. Inference does not require extreme system RAM.
 
 ## Model Information
 
@@ -232,8 +276,13 @@ This project is licensed under the GPL-3.0 License.
 - Qwen3-TTS by Alibaba Qwen Team
 - ComfyUI community
 
+## Thank You & Support
+
+Big thanks to the Qwen3-TTS team for open-sourcing the models and tooling that make this project possible.
+If this node helps you, consider starring both the official Qwen3-TTS repo and this project to support continued development.
+
 ## Support
 
 If you hit issues:
 - Open an issue in this repo
-- Include your ComfyUI logs and model path
+- Include your ComfyUI
