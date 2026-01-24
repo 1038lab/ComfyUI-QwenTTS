@@ -1,10 +1,22 @@
 [project]
 name = "ComfyUI-QwenTTS"
-description = "ComfyUI custom nodes for speech, voice cloning, and voice design based on Qwen3-TTS models"
-version = "0.0.1"
+description = "A clean, efficient ComfyUI custom node pack for Qwen3-TTS. It provides CustomVoice, VoiceDesign, and VoiceClone workflows with strict ComfyUI compatibility and practical controls for quality, speed, and stability."
+version = "1.0.0"
 license = {file = "LICENSE"}
 
-dependencies = []
+dependencies = [
+  "accelerate>=1.12.0",
+  "einops>=0.8.1",
+  "huggingface_hub>=1.3.2",
+  "librosa>=0.11.0",
+  "numpy>=2.4.1",
+  "sentencepiece>=0.2.1",
+  "soundfile>=0.13.1",
+  "tiktoken>=0.12.0",
+  "torch>=2.9.1",
+  "torchaudio>=2.9.1",
+  "transformers>=4.57.3",
+]
     
 [project.urls]
 Repository = "https://github.com/1038lab/ComfyUI-QwenTTS"
