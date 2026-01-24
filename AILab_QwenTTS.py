@@ -546,7 +546,7 @@ class Qwen3TTSCustomVoiceBasic:
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("audio",)
+    RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
     CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
 
@@ -596,7 +596,7 @@ class Qwen3TTSCustomVoiceAdvanced:
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("audio",)
+    RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
     CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
 
@@ -636,7 +636,7 @@ class Qwen3TTSVoiceDesignBasic:
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("audio",)
+    RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
     CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
 
@@ -684,7 +684,7 @@ class Qwen3TTSVoiceDesignAdvanced:
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("audio",)
+    RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
     CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
 
@@ -725,7 +725,7 @@ class Qwen3TTSVoiceCloneBasic:
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("audio",)
+    RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
     CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
 
@@ -778,7 +778,7 @@ class Qwen3TTSVoiceCloneAdvanced:
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("audio",)
+    RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
     CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
 
