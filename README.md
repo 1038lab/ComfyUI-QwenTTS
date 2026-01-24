@@ -108,6 +108,8 @@ modelscope download --model Qwen/Qwen3-TTS-12Hz-0.6B-Base --local_dir ./Qwen3-TT
 
 ## Usage
 
+![V1.0.0_sample_workfloow](example_workflows/QwenTTS.jpg)
+
 ### Basic vs Advanced
 - **Basic**: Minimal inputs, faster defaults (`do_sample=False`, `precision=bf16`).
 - **Advanced**: Full control (sampling params, max_new_tokens, device/precision, unload).
