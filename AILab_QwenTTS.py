@@ -548,7 +548,7 @@ class Qwen3TTSCustomVoiceBasic:
     RETURN_TYPES = ("AUDIO",)
     RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
+    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
 
     def generate(self, text, speaker, model_size, language, instruct="", seed=-1):
         return _custom_voice_generate(
@@ -598,7 +598,7 @@ class Qwen3TTSCustomVoiceAdvanced:
     RETURN_TYPES = ("AUDIO",)
     RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
+    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
 
     def generate(self, text, speaker, model_size, device, precision, language, instruct="", seed=-1, max_new_tokens=2048, do_sample=True, top_p=0.9, top_k=50, temperature=0.9, repetition_penalty=1.0, unload_models=False):
         return _custom_voice_generate(
@@ -638,7 +638,7 @@ class Qwen3TTSVoiceDesignBasic:
     RETURN_TYPES = ("AUDIO",)
     RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
+    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
 
     def generate(self, text, instruct, model_size, language, seed=-1):
         return _voice_design_generate(
@@ -686,7 +686,7 @@ class Qwen3TTSVoiceDesignAdvanced:
     RETURN_TYPES = ("AUDIO",)
     RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
+    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
 
     def generate(self, text, instruct, model_size, device, precision, language, seed=-1, max_new_tokens=2048, do_sample=True, top_p=0.9, top_k=50, temperature=0.9, repetition_penalty=1.0, unload_models=False):
         return _voice_design_generate(
@@ -727,7 +727,7 @@ class Qwen3TTSVoiceCloneBasic:
     RETURN_TYPES = ("AUDIO",)
     RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
+    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
 
     def generate(self, reference_audio, target_text, model_size, language, reference_text="", x_vector_only=False, seed=-1):
         return _voice_clone_generate(
@@ -780,7 +780,7 @@ class Qwen3TTSVoiceCloneAdvanced:
     RETURN_TYPES = ("AUDIO",)
     RETURN_NAMES = ("AUDIO",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/QwenTTS"
+    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
 
     def generate(self, reference_audio, target_text, model_size, device, precision, language, reference_text="", x_vector_only=False, seed=-1, max_new_tokens=2048, do_sample=True, top_p=0.9, top_k=50, temperature=0.9, repetition_penalty=1.0, unload_models=False):
         return _voice_clone_generate(
