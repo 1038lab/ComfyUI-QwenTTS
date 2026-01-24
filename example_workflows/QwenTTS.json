@@ -1,0 +1,409 @@
+{
+  "id": "6b2e5d09-d1ea-4fc9-a8bd-8daca49d65ff",
+  "revision": 0,
+  "last_node_id": 52,
+  "last_link_id": 38,
+  "nodes": [
+    {
+      "id": 46,
+      "type": "AILab_Qwen3TTSVoiceClone",
+      "pos": [
+        2.1580014941039964,
+        947.4393213149233
+      ],
+      "size": [
+        340,
+        262
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "reference_audio",
+          "type": "AUDIO",
+          "link": 35
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            37
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSVoiceClone",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Hello, this is a cloned voice.",
+        "0.6B",
+        "Auto",
+        "",
+        false,
+        -1,
+        "randomize"
+      ],
+      "color": "#4D2600",
+      "bgcolor": "#3e5249"
+    },
+    {
+      "id": 47,
+      "type": "LoadAudio",
+      "pos": [
+        2.1580014941039964,
+        767.8369715781096
+      ],
+      "size": [
+        340,
+        136
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            35
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.10.0",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "107289363.mp4",
+        null,
+        ""
+      ]
+    },
+    {
+      "id": 51,
+      "type": "SaveAudioMP3",
+      "pos": [
+        2.1580014941039964,
+        1260.041137629123
+      ],
+      "size": [
+        340,
+        136
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 37
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.10.0",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "SaveAudioMP3"
+      },
+      "widgets_values": [
+        "audio/ComfyUI",
+        "320k"
+      ]
+    },
+    {
+      "id": 49,
+      "type": "SaveAudioMP3",
+      "pos": [
+        368.7138198400269,
+        1260.041137629123
+      ],
+      "size": [
+        340,
+        136
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 38
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.10.0",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "SaveAudioMP3"
+      },
+      "widgets_values": [
+        "audio/ComfyUI",
+        "V0"
+      ]
+    },
+    {
+      "id": 45,
+      "type": "AILab_Qwen3TTSCustomVoice",
+      "pos": [
+        368.7138198400269,
+        947.4393213149233
+      ],
+      "size": [
+        340,
+        262
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            38
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSCustomVoice",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Hello from Qwen3-TTS.",
+        "Ryan",
+        "1.7B",
+        "Auto",
+        "",
+        -1,
+        "randomize"
+      ],
+      "color": "#4D2600",
+      "bgcolor": "#3e5249"
+    },
+    {
+      "id": 41,
+      "type": "AILab_Qwen3TTSVoiceDesign",
+      "pos": [
+        737.700114583396,
+        945.6163481165029
+      ],
+      "size": [
+        340,
+        238
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            36
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSVoiceDesign",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Hello from Qwen3-TTS VoiceDesign.",
+        "A warm, gentle female voice.",
+        "1.7B",
+        "Auto",
+        -1,
+        "randomize"
+      ],
+      "color": "#4D2600",
+      "bgcolor": "#3e5249"
+    },
+    {
+      "id": 50,
+      "type": "SaveAudioMP3",
+      "pos": [
+        737.700114583396,
+        1258.2181644307025
+      ],
+      "size": [
+        340,
+        136
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 36
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.10.0",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "SaveAudioMP3"
+      },
+      "widgets_values": [
+        "audio/ComfyUI",
+        "128k"
+      ]
+    },
+    {
+      "id": 52,
+      "type": "MarkdownNote",
+      "pos": [
+        -418.20320401527084,
+        760.3485979843861
+      ],
+      "size": [
+        383.75722406036607,
+        599.0649205241322
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "# ComfyUI-QwenTTS\n\nA clean, efficient ComfyUI custom node pack for **Qwen3-TTS**. It provides **CustomVoice**, **VoiceDesign**, and **VoiceClone** workflows with strict ComfyUI compatibility and practical controls for quality, speed, and stability.\n\n## Usage\n\n### Custom Voice TTS\nAdd **Qwen3 TTS CustomVoice** and fill `text`, choose `speaker`, optionally add `instruct`.\n\n### Voice Design\nAdd **Qwen3 TTS VoiceDesign**, provide `text` and `instruct`.\n\n### Voice Clone\nAdd **Qwen3 TTS VoiceClone**, connect `reference_audio`, and provide `reference_text`.\n\n## Model Download\n\nModels can be auto-downloaded to:\n```\nComfyUI/models/TTS/Qwen3-TTS/<MODEL_NAME>/\n```\n\nSupported model IDs (Hugging Face):\n- [Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice)\n- [Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice)\n- [Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign)\n- [Qwen/Qwen3-TTS-12Hz-1.7B-Base](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-Base)\n- [Qwen/Qwen3-TTS-12Hz-0.6B-Base](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-Base)\n- [Qwen/Qwen3-TTS-Tokenizer-12Hz](https://huggingface.co/Qwen/Qwen3-TTS-Tokenizer-12Hz)\n\n\n## FlashAttention (Optional)\n\nIf you have a compatible NVIDIA GPU, FlashAttention 2 can improve speed.\n\n```bash\npip install flash-attn --no-build-isolation\n```"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    }
+  ],
+  "links": [
+    [
+      35,
+      47,
+      0,
+      46,
+      0,
+      "AUDIO"
+    ],
+    [
+      36,
+      41,
+      0,
+      50,
+      0,
+      "AUDIO"
+    ],
+    [
+      37,
+      46,
+      0,
+      51,
+      0,
+      "AUDIO"
+    ],
+    [
+      38,
+      45,
+      0,
+      49,
+      0,
+      "AUDIO"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Voice Clone",
+      "bounding": [
+        -7.841998505896003,
+        694.2369715781095,
+        360,
+        711.8041660510136
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "Custom  Voice",
+      "bounding": [
+        358.7138198400269,
+        873.8393213149233,
+        359.99999999999994,
+        532.2018163141998
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "Voice Design",
+      "bounding": [
+        727.700114583396,
+        872.0163481165029,
+        360,
+        532.2018163141998
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "workflowRendererVersion": "LG",
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "ds": {
+      "scale": 0.8174702380952421,
+      "offset": [
+        2241.6324900890713,
+        -216.98893484182727
+      ]
+    },
+    "frontendVersion": "1.37.11",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
