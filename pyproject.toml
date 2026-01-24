@@ -25,4 +25,4 @@ Repository = "https://github.com/1038lab/ComfyUI-QwenTTS"
 [tool.comfy]
 PublisherId = "ailab"
 DisplayName = "ComfyUI-QwenTTS"
-Icon = """"
+Icon = ""
