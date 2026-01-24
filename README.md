@@ -1,8 +1,8 @@
-# ComfyUI QwenTTS Node
+# ComfyUI-QwenTTS
 
 A clean, efficient ComfyUI custom node pack for **Qwen3-TTS**. It provides **CustomVoice**, **VoiceDesign**, and **VoiceClone** workflows with strict ComfyUI compatibility and practical controls for quality, speed, and stability.
 
-<img width="1776" height="1418" alt="image" src="https://github.com/user-attachments/assets/6cb4f0a0-9e7c-48a9-b01d-1a4d96cbdab0" />
+![ComfyUI-QwenTTS_V1.0.0](https://github.com/user-attachments/assets/6cb4f0a0-9e7c-48a9-b01d-1a4d96cbdab0)
 
 ## Features
 
