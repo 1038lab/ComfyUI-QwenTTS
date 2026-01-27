@@ -1,8 +1,8 @@
 import { app } from "/scripts/app.js";
 
 const COLOR_THEMES = {
-    QwenTTS: { nodeColor: "#4D2600", nodeBgColor: "#3e5249", width: 340 },
-    QwenTTSAdv: { nodeColor: "#4D2600", nodeBgColor: "#24302b", width: 340 },
+    QwenTTS: { nodeColor: "#4D2600", nodeBgColor: "#3e5249", width: 300 },
+    QwenTTSAdv: { nodeColor: "#4D2600", nodeBgColor: "#24302b", width: 300 },
     Tools: { nodeColor: "#28403f", nodeBgColor: "#233238", width: 300 },
 };
 
@@ -16,7 +16,9 @@ const NODE_COLORS = {
     "AILab_Qwen3TTSVoiceClone_Advanced": "QwenTTSAdv",
 
     // Tools
-    "AILab_QwenVL_PromptLibrary": "Tools",
+    "AILab_Qwen3TTSVoicesLibrary": "Tools",
+    "AILab_Qwen3TTSLoadVoice": "Tools",
+    "AILab_Qwen3TTSWhisperSTT": "Tools",
 };
 
 function setNodeColors(node, theme) {
@@ -34,7 +36,7 @@ function setNodeColors(node, theme) {
 }
 
 const ext = {
-    name: "QwenVL.appearance",
+    name: "QwenTTS.appearance",
 
     nodeCreated(node) {
         const nclass = node.comfyClass;
