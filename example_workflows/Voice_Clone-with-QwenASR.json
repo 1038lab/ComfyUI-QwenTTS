@@ -1,0 +1,362 @@
+{
+  "id": "1ce9bf9d-79b6-4921-b28c-1589ad2ec745",
+  "revision": 0,
+  "last_node_id": 23,
+  "last_link_id": 21,
+  "nodes": [
+    {
+      "id": 15,
+      "type": "PreviewAudio",
+      "pos": [
+        4855.093031367065,
+        1175.7639462494205
+      ],
+      "size": [
+        300,
+        88
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 13
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.11.0",
+        "Node name for S&R": "PreviewAudio",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 16,
+      "type": "SaveAudio",
+      "pos": [
+        4855.093031367065,
+        1316.3023772251381
+      ],
+      "size": [
+        300,
+        112
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 14
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.11.0",
+        "Node name for S&R": "SaveAudio",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "audio/ComfyUI"
+      ]
+    },
+    {
+      "id": 23,
+      "type": "AILab_Qwen3ASR",
+      "pos": [
+        4117.330546089622,
+        1358.8084579467613
+      ],
+      "size": [
+        400,
+        200
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "TEXT",
+          "type": "STRING",
+          "links": [
+            21
+          ]
+        }
+      ],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "AILab_Qwen3ASR"
+      },
+      "widgets_values": [
+        "Qwen/Qwen3-ASR-0.6B",
+        "bf16",
+        "auto",
+        "",
+        true
+      ],
+      "color": "#151c19",
+      "bgcolor": "#444d49"
+    },
+    {
+      "id": 22,
+      "type": "PrimitiveNode",
+      "pos": [
+        4117.330546089622,
+        1603.920611009952
+      ],
+      "size": [
+        400,
+        176.0001342773437
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "widget": {
+            "name": "target_text"
+          },
+          "links": [
+            19
+          ]
+        }
+      ],
+      "properties": {
+        "Run widget replace on values": false,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.5.2",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "Use the latest ComfyUI-QwenASR for speech-to-text—it’s easy to use and highly accurate for translating voice into text. Then use Qwen3-TTS to clone a voice and convert the content back into speech with your preferred voice tone."
+      ]
+    },
+    {
+      "id": 14,
+      "type": "AILab_Qwen3TTSVoiceClone_Advanced",
+      "pos": [
+        4536.211788728344,
+        1175.7639462494205
+      ],
+      "size": [
+        300,
+        612.6400268554689
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "reference_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 16
+        },
+        {
+          "name": "voice",
+          "shape": 7,
+          "type": "VOICE",
+          "link": null
+        },
+        {
+          "name": "target_text",
+          "type": "STRING",
+          "widget": {
+            "name": "target_text"
+          },
+          "link": 19
+        },
+        {
+          "name": "reference_text",
+          "shape": 7,
+          "type": "STRING",
+          "widget": {
+            "name": "reference_text"
+          },
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            13,
+            14
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfyui-qwentts",
+        "ver": "1.1.2",
+        "Node name for S&R": "AILab_Qwen3TTSVoiceClone_Advanced",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Use the latest ComfyUI-QwenASR for speech-to-text—it’s easy to use and highly accurate for translating voice into text. Then use Qwen3-TTS to clone a voice and convert the content back into speech with your preferred voice tone.",
+        "0.6B",
+        "auto",
+        "bf16",
+        "Auto",
+        "",
+        false,
+        2048,
+        false,
+        0.9,
+        50,
+        0.9,
+        1,
+        "auto",
+        true,
+        370269181128738,
+        "randomize"
+      ],
+      "color": "#4D2600",
+      "bgcolor": "#24302b"
+    },
+    {
+      "id": 20,
+      "type": "LoadAudio",
+      "pos": [
+        4117.330546089622,
+        1175.7639462494205
+      ],
+      "size": [
+        400,
+        136
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            16,
+            20
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.11.1",
+        "Node name for S&R": "LoadAudio",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "audio_946422_temp.wav",
+        null,
+        null
+      ]
+    }
+  ],
+  "links": [
+    [
+      13,
+      14,
+      0,
+      15,
+      0,
+      "AUDIO"
+    ],
+    [
+      14,
+      14,
+      0,
+      16,
+      0,
+      "AUDIO"
+    ],
+    [
+      16,
+      20,
+      0,
+      14,
+      0,
+      "AUDIO"
+    ],
+    [
+      19,
+      22,
+      0,
+      14,
+      2,
+      "STRING"
+    ],
+    [
+      20,
+      20,
+      0,
+      23,
+      0,
+      "AUDIO"
+    ],
+    [
+      21,
+      23,
+      0,
+      14,
+      3,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "workflowRendererVersion": "LG",
+    "ue_links": [],
+    "ds": {
+      "scale": 1,
+      "offset": [
+        -3891.6677480451067,
+        -599.9832549854467
+      ]
+    },
+    "links_added_by_ue": [],
+    "frontendVersion": "1.37.11",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
