@@ -17,6 +17,8 @@
 - README includes `extra_model_paths.yaml` guidance for custom model locations.
 - **Audio Duration** node rewritten: cleaner logic, seconds-based outputs, optional frame calculation.
 
+[More updated Details](Update.md)
+
 ---
 
 ## Quickstart (3 minutes)
