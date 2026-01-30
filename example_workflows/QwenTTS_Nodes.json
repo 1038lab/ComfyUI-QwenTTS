@@ -1,0 +1,543 @@
+{
+  "id": "6b2e5d09-d1ea-4fc9-a8bd-8daca49d65ff",
+  "revision": 0,
+  "last_node_id": 78,
+  "last_link_id": 52,
+  "nodes": [
+    {
+      "id": 72,
+      "type": "AILab_Qwen3TTSVoiceDesign_Advanced",
+      "pos": [
+        -191.39724523616084,
+        1871.6230800211358
+      ],
+      "size": [
+        300,
+        478
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSVoiceDesign_Advanced",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Hello from Qwen3-TTS VoiceDesign.",
+        "A warm, gentle female voice.",
+        "1.7B",
+        "auto",
+        "bf16",
+        "Auto",
+        2048,
+        false,
+        0.9,
+        50,
+        0.9,
+        1,
+        "auto",
+        true,
+        -1,
+        "randomize"
+      ],
+      "color": "#4D2600",
+      "bgcolor": "#24302b"
+    },
+    {
+      "id": 70,
+      "type": "AILab_Qwen3TTSVoiceClone_Advanced",
+      "pos": [
+        127.12281156634245,
+        1873.280793689468
+      ],
+      "size": [
+        300,
+        522
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "reference_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "voice",
+          "shape": 7,
+          "type": "VOICE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSVoiceClone_Advanced",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Hello, this is a cloned voice.",
+        "1.7B",
+        "auto",
+        "bf16",
+        "Auto",
+        "",
+        false,
+        2048,
+        false,
+        0.9,
+        50,
+        0.9,
+        1,
+        "auto",
+        true,
+        -1,
+        "randomize"
+      ],
+      "color": "#4D2600",
+      "bgcolor": "#24302b"
+    },
+    {
+      "id": 69,
+      "type": "AILab_Qwen3TTSVoiceClone",
+      "pos": [
+        127.12281156634245,
+        1517.7158265651694
+      ],
+      "size": [
+        300,
+        306
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "reference_audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "voice",
+          "shape": 7,
+          "type": "VOICE",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSVoiceClone",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Hello, this is a cloned voice.",
+        "1.7B",
+        "Auto",
+        "",
+        false,
+        true,
+        -1,
+        "randomize"
+      ],
+      "color": "#4D2600",
+      "bgcolor": "#3e5249"
+    },
+    {
+      "id": 71,
+      "type": "AILab_Qwen3TTSVoiceDesign",
+      "pos": [
+        -191.39724523616084,
+        1517.7158265651694
+      ],
+      "size": [
+        300,
+        262
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSVoiceDesign",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Hello from Qwen3-TTS VoiceDesign.",
+        "A warm, gentle female voice.",
+        "1.7B",
+        "Auto",
+        true,
+        -1,
+        "randomize"
+      ],
+      "color": "#4D2600",
+      "bgcolor": "#3e5249"
+    },
+    {
+      "id": 65,
+      "type": "AILab_Qwen3TTSCustomVoice",
+      "pos": [
+        445.6428683688457,
+        1517.7158265651694
+      ],
+      "size": [
+        300,
+        286
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSCustomVoice",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Hello from Qwen3-TTS.",
+        "Ryan",
+        "1.7B",
+        "Auto",
+        "",
+        true,
+        -1,
+        "randomize"
+      ],
+      "color": "#4D2600",
+      "bgcolor": "#3e5249"
+    },
+    {
+      "id": 66,
+      "type": "AILab_Qwen3TTSCustomVoice_Advanced",
+      "pos": [
+        445.6428683688457,
+        1880.0461893891973
+      ],
+      "size": [
+        300,
+        502
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSCustomVoice_Advanced",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Hello from Qwen3-TTS.",
+        "Ryan",
+        "1.7B",
+        "auto",
+        "bf16",
+        "Auto",
+        "",
+        2048,
+        false,
+        0.9,
+        50,
+        0.9,
+        1,
+        "auto",
+        true,
+        -1,
+        "randomize"
+      ],
+      "color": "#4D2600",
+      "bgcolor": "#24302b"
+    },
+    {
+      "id": 75,
+      "type": "AILab_Qwen3TTSWhisperSTT",
+      "pos": [
+        764.162925171349,
+        1517.7158265651694
+      ],
+      "size": [
+        300,
+        106
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "text",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSWhisperSTT",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "small",
+        "auto",
+        true
+      ],
+      "color": "#28403f",
+      "bgcolor": "#233238"
+    },
+    {
+      "id": 74,
+      "type": "AILab_Qwen3TTSVoicesLibrary",
+      "pos": [
+        1082.6829819738523,
+        1517.7158265651694
+      ],
+      "size": [
+        300,
+        256
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "reference_audio",
+          "type": "AUDIO",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "VOICE",
+          "type": "VOICE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSVoicesLibrary",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "",
+        "1.7B",
+        "auto",
+        "bf16",
+        false,
+        "voice_1",
+        "",
+        true
+      ],
+      "color": "#28403f",
+      "bgcolor": "#233238"
+    },
+    {
+      "id": 77,
+      "type": "AILab_Qwen3TTSVoiceInstruct",
+      "pos": [
+        1082.6829819738523,
+        1827.8611503802078
+      ],
+      "size": [
+        300,
+        200
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VOICE_INSTRUCT",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSVoiceInstruct",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "Auto",
+        "Auto",
+        ""
+      ],
+      "color": "#28403f",
+      "bgcolor": "#233238"
+    },
+    {
+      "id": 78,
+      "type": "AILab_Qwen3TTSVoiceInstructZH",
+      "pos": [
+        764.516588834801,
+        1829.4161165818666
+      ],
+      "size": [
+        300,
+        200
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VOICE_INSTRUCT",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {}
+        },
+        "Node name for S&R": "AILab_Qwen3TTSVoiceInstructZH"
+      },
+      "widgets_values": [
+        "自动",
+        "自动",
+        ""
+      ],
+      "color": "#28403f",
+      "bgcolor": "#233238"
+    },
+    {
+      "id": 67,
+      "type": "AILab_Qwen3TTSLoadVoice",
+      "pos": [
+        764.516588834801,
+        1688.1383824177724
+      ],
+      "size": [
+        300,
+        82
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VOICE",
+          "type": "VOICE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "AILab_Qwen3TTSLoadVoice",
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "input_ue_unconnectable": {},
+          "version": "7.5.2"
+        }
+      },
+      "widgets_values": [
+        "My_Voice.pt",
+        ""
+      ],
+      "color": "#28403f",
+      "bgcolor": "#233238"
+    }
+  ],
+  "links": [],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "workflowRendererVersion": "LG",
+    "ue_links": [],
+    "links_added_by_ue": [],
+    "ds": {
+      "scale": 0.9891389880952449,
+      "offset": [
+        497.1767544457949,
+        -1264.6080566905393
+      ]
+    },
+    "frontendVersion": "1.37.11",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
