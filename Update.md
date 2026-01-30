@@ -20,8 +20,6 @@
   - English preset builder from `voice_instruct.json`.
 - 声音风格指引 (QwenTTS)
   - 中文预设 builder from `voice_instruct_zh.json`.
-- Text Token Count (QwenTTS)
-  - Counts text tokens and outputs a rounded value for `max_new_tokens`.
 
 ## Audio Duration
 - Outputs: `duration_int` (seconds), `duration_float` (seconds), `frames`, `audio_path`.
