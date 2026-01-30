@@ -81,6 +81,14 @@ If you have a compatible NVIDIA GPU, FlashAttention 2 can improve speed.
 pip install flash-attn --no-build-isolation
 ```
 
+### Optional: SageAttention (Experimental)
+
+If you want to try `sage_attn` in Advanced nodes, install `sageattention`:
+
+```bash
+pip install sageattention
+```
+
 > [!NOTE]
 > Requires CUDA and `torch` built with a compatible CUDA version.
 > Only works with `fp16`/`bf16` precision.
@@ -118,6 +126,31 @@ All Qwen3-TTS assets are stored in one consistent location:
 ComfyUI/models/TTS/Qwen3-TTS/<MODEL_NAME>/
 ```
 This node will not download or create model folders elsewhere.
+
+### Extra Model Paths (Optional)
+
+If you store models outside the default ComfyUI path, configure ComfyUI’s
+`extra_model_paths.yaml` in the ComfyUI root. This node relies on ComfyUI’s
+standard model path system.
+
+Supported location:
+- `ComfyUI/extra_model_paths.yaml`
+
+Example (ComfyUI format):
+```yaml
+comfyui:
+  base_path: D:/AI/ComfyUI-Models
+  tts: models/TTS/  # use lowercase `tts`
+```
+If your ComfyUI build does not expose a `TTS` key, keep the default layout
+`ComfyUI/models/TTS/Qwen3-TTS/` and skip this section.
+
+How to place Qwen3-TTS models in a custom location:
+1) Set `base_path` to your shared models root.
+2) Put Qwen3‑TTS models under:
+   - `<base_path>/TTS/Qwen3-TTS/<MODEL_NAME>/`
+3) Add that root to `extra_model_paths.yaml` (under `tts` as shown above).
+4) Restart ComfyUI.
 
 ### Why So Many Files?
 
@@ -176,6 +209,14 @@ Add **Qwen3 TTS VoiceDesign**, provide `text` and `instruct`.
 
 ### Voice Clone
 Add **Qwen3 TTS VoiceClone**, connect `reference_audio`, and provide `reference_text`.
+Or use a saved voice from **Voices Library (QwenTTS)** and connect `voice_path`.
+
+### Create Voice (Recommended)
+Use **Create Voice (QwenTTS)** to save a reusable voice to:
+```
+ComfyUI/output/qwen3-tts_voices/<voice_name>.pt
+```
+Then use **Load Voice (QwenTTS)** to output `VOICE` and plug it into **Voice Clone**.
 
 ### Advanced Nodes
 
@@ -183,6 +224,13 @@ Advanced nodes expose sampling controls and max token limits:
 - **Qwen3 TTS CustomVoice (Advanced)**
 - **Qwen3 TTS VoiceDesign (Advanced)**
 - **Qwen3 TTS VoiceClone (Advanced)**
+
+### Tools
+- **Whisper STT (QwenTTS)**: Transcribe `AUDIO` to text.
+- **Voice Instruct (QwenTTS)**: English voice-style presets from `voice_instruct.json`.
+- **声音风格指引 (QwenTTS)**: 中文语气预设，来自 `voice_instruct_zh.json`。
+- **Text Token Count (QwenTTS)**: Count tokens for text and output a rounded `max_new_tokens`.
+- **Audio Duration & Frames**: Returns duration (seconds) and optional frame count when `fps` is provided.
 
 ## Supported Speakers (CustomVoice)
 
@@ -216,11 +264,12 @@ VoiceDesign and CustomVoice 1.7B respond best; 0.6B ignores `instruct`.
 | device | COMBO | auto | auto / cuda / mps / cpu |
 | precision | COMBO | bf16 | bf16 / fp16 / fp32 |
 | max_new_tokens | INT | 2048 | Max codec tokens |
-| do_sample | BOOLEAN | True | Enable sampling |
+| do_sample | BOOLEAN | False | Enable sampling |
 | top_p | FLOAT | 0.9 | Top-p sampling |
 | top_k | INT | 50 | Top-k sampling |
 | temperature | FLOAT | 0.9 | Sampling temperature |
 | repetition_penalty | FLOAT | 1.0 | Reduce repetition |
+| attention | COMBO | auto | auto / sage_attn / flash_attn / sdpa / eager |
 | seed | INT | -1 | Seed (-1 for random) |
 | unload_models | BOOLEAN | False | Clear cached models after run |
 
@@ -228,11 +277,12 @@ VoiceDesign and CustomVoice 1.7B respond best; 0.6B ignores `instruct`.
 
 | Parameter | Type | Default | Description |
 |---|---|---|---|
+| voice | VOICE | - | Optional saved voice from Voices Library |
 | reference_audio | AUDIO | - | Reference voice sample |
 | reference_text | STRING | "" | Transcript of reference audio |
 | x_vector_only | BOOLEAN | False | Clone with speaker embedding only |
 
-If `x_vector_only` is `False`, `reference_text` is required.
+If `voice` is not provided and `x_vector_only` is `False`, `reference_text` is required.
 
 ## Outputs
 
