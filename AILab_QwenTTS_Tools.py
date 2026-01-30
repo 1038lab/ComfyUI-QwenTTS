@@ -415,45 +415,41 @@ class Qwen3TTSWhisperSTT:
                     pass
 
 
-class Qwen3TTSTextTokenCount:
-    _RATIO = 8.0
-    _MIN_LIMIT = 384
-    _MAX_LIMIT = 4096
-    _ROUND_TO = 64
-
+class Qwen3TTSVoiceInstruct:
     @classmethod
     def INPUT_TYPES(cls):
+        character_labels, style_labels, _, _ = _build_voice_instruct_options()
         return {
             "required": {
-                "text": ("STRING", {"multiline": True, "default": "", "tooltip": "Text to count tokens for."}),
-            }
+                "character": (character_labels, {"default": character_labels[0] if character_labels else "Auto", "tooltip": "Voice character preset (from presets/voice_instruct.json)."}),
+                "style": (style_labels, {"default": style_labels[0] if style_labels else "Auto", "tooltip": "Voice style preset (from presets/voice_instruct.json)."}),
+            },
+            "optional": {
+                "custom_instruct": ("STRING", {"default": "", "multiline": True, "tooltip": "Custom instruction. Overrides presets if provided."}),
+            },
         }
 
-    RETURN_TYPES = ("STRING", "INT")
-    RETURN_NAMES = ("text", "max_new_tokens")
-    FUNCTION = "count"
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("VOICE_INSTRUCT",)
+    FUNCTION = "build"
     CATEGORY = "🧪AILab/🎙️QwenTTS"
 
-    def count(self, text):
-        if not _TEXT_TOKENIZER_MODEL_ID:
-            raise RuntimeError("No suitable Qwen3-TTS model id found for text tokenization.")
-        tokenizer = _get_text_tokenizer(_TEXT_TOKENIZER_MODEL_ID)
-        ids = tokenizer(text or "", add_special_tokens=False).get("input_ids", [])
-        count = int(len(ids))
-        est = int(math.ceil(count * float(self._RATIO)))
-        min_cap = int(self._MIN_LIMIT) if int(self._MIN_LIMIT) > 0 else 0
-        max_cap = int(self._MAX_LIMIT) if int(self._MAX_LIMIT) > 0 else 0
-        if min_cap > 0:
-            est = max(est, min_cap)
-        if max_cap > 0:
-            est = min(est, max_cap)
-        divisor = int(self._ROUND_TO) if int(self._ROUND_TO) > 0 else 1
-        rounded = ((est + divisor - 1) // divisor) * divisor
-        if max_cap > 0 and rounded > max_cap:
-            rounded = max_cap
-        if min_cap > 0 and rounded < min_cap:
-            rounded = min_cap
-        return (text or "", rounded)
+    def build(self, character="Auto", style="Auto", custom_instruct=""):
+        text = (custom_instruct or "").strip()
+        if text:
+            return (text,)
+
+        _, _, character_map, style_map = _build_voice_instruct_options()
+        char_text = (character_map.get(character) or "").strip()
+        style_text = (style_map.get(style) or "").strip()
+
+        parts = []
+        if char_text:
+            parts.append(char_text)
+        if style_text:
+            parts.append(style_text)
+
+        return ("\n".join(parts).strip(),)
 
 
 class Qwen3TTSVoiceInstructZH:
