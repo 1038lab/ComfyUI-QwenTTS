@@ -6,6 +6,14 @@
 - Advanced nodes now expose attention selection (auto / sage_attn / flash_attn / sdpa / eager).
 - README expanded with ComfyUI `extra_model_paths.yaml` guidance for custom model locations.
 - Audio Duration node rewritten: cleaner logic, seconds-based outputs, optional frame calculation.
+- 5 new sample workflows (v1.1.0):
+  - [Clone_Voice.json](example_workflows/Clone_Voice.json) — Voice Clone demo workflow (2 variants).
+  - [Create_your_voice.json](example_workflows/Create_your_voice.json) — Create and save your own voice profile.
+  - [QwenTTS_Nodes.json](example_workflows/QwenTTS_Nodes.json) — Overview of all custom nodes in this repo.
+  - [QwenTTS_sample_workflow.json](example_workflows/QwenTTS_sample_workflow.json) — Sample nodes for Voice Clone, Voice Design, and Custom Voice.
+  - [Voice_design.json](example_workflows/Voice_design.json) — Advanced Voice Design + preset voice instruct nodes (EN/ZH).
+
+![Clone_voice](example_workflows/Clone_Voice.jpg)
 
 ## New / Updated Nodes
 - Create Voice (QwenTTS)
@@ -19,7 +27,7 @@
 - Voice Instruct (QwenTTS)
   - English preset builder from `voice_instruct.json`.
 - 声音风格指引 (QwenTTS)
-  - 中文预设 builder from `voice_instruct_zh.json`.
+  - Chinese preset builder from `voice_instruct_zh.json`.
 
 ## Audio Duration
 - Outputs: `duration_int` (seconds), `duration_float` (seconds), `frames`, `audio_path`.
