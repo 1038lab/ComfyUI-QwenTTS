@@ -1,8 +1,8 @@
 import { app } from "/scripts/app.js";
 
 const COLOR_THEMES = {
-    QwenTTS: { nodeColor: "#4D2600", nodeBgColor: "#3e5249", width: 300 },
-    QwenTTSAdv: { nodeColor: "#4D2600", nodeBgColor: "#24302b", width: 300 },
+    QwenTTS: { nodeColor: "#151c19", nodeBgColor: "#3e5249", width: 300 },
+    QwenTTSAdv: { nodeColor: "#151c19", nodeBgColor: "#24302b", width: 300 },
     Tools: { nodeColor: "#28403f", nodeBgColor: "#233238", width: 300 },
 };
 
@@ -19,6 +19,9 @@ const NODE_COLORS = {
     "AILab_Qwen3TTSVoicesLibrary": "Tools",
     "AILab_Qwen3TTSLoadVoice": "Tools",
     "AILab_Qwen3TTSWhisperSTT": "Tools",
+    "AILab_Qwen3TTSVoiceInstruct": "Tools",
+    "AILab_Qwen3TTSVoiceInstructZH": "Tools",
+    "AILab_AudioDuration": "Tools",
 };
 
 function setNodeColors(node, theme) {
