@@ -49,7 +49,7 @@ python3 -m pip install -r ComfyUI/custom_nodes/ComfyUI-QwenTTS/requirements.txt 
 ```
 
 ### 3) Import workflow
-- Import: `example_workflows/QwenTTS.json`
+- Import: `example_workflows/QwenTTS_sample_workflow.json`
 - Run it once (first run is slower due to model download + warmup)
 
 ---
@@ -65,16 +65,113 @@ python3 -m pip install -r ComfyUI/custom_nodes/ComfyUI-QwenTTS/requirements.txt 
 - **Advanced control nodes**: sampling, max_new_tokens, attention backend, unload.
 
 ---
+## Model Overview (Qwen3-TTS)
 
-## Models (Qwen3‑TTS 12Hz)
+- **Languages**: Chinese, English, Japanese, Korean, German, French, Russian, Portuguese, Spanish, Italian.  
+- **Instruction control**: Supports voice style control via natural-language instructions.  
+- **Tokenizer**: Uses Qwen3-TTS-Tokenizer-12Hz for speech encoding/decoding.  
 
-Supported Hugging Face model IDs:
-- Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice
-- Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice
-- Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign
-- Qwen/Qwen3-TTS-12Hz-1.7B-Base
-- Qwen/Qwen3-TTS-12Hz-0.6B-Base
-- Qwen/Qwen3-TTS-Tokenizer-12Hz
+## Model Matrix (12Hz)
+
+| Model | Size | Features | Streaming | Instruction |
+|---|---|---|---|---|
+| CustomVoice | 1.7B | 9 premium timbres, style control | ✅ | ✅ |
+| VoiceDesign | 1.7B | Voice design from descriptions | ✅ | ✅ |
+| Base | 1.7B | 3s rapid voice clone, FT base | ✅ | - |
+| CustomVoice | 0.6B | 9 premium timbres | ✅ | - |
+| Base | 0.6B | 3s rapid voice clone | ✅ | - |
+| Tokenizer | 12Hz | Speech encode/decode | - | - |
+
+## Models Download
+
+Models can be auto-downloaded to:
+```
+ComfyUI/models/TTS/Qwen3-TTS/<MODEL_NAME>/
+```
+
+Supported model IDs (Hugging Face):
+- [Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice)
+- [Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice)
+- [Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign)
+- [Qwen/Qwen3-TTS-12Hz-1.7B-Base](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-1.7B-Base)
+- [Qwen/Qwen3-TTS-12Hz-0.6B-Base](https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-Base)
+- [Qwen/Qwen3-TTS-Tokenizer-12Hz](https://huggingface.co/Qwen/Qwen3-TTS-Tokenizer-12Hz)
+
+If a model is missing locally, it will be downloaded automatically on first use.
+
+### Model Folder Policy
+
+All Qwen3-TTS assets are stored in one consistent location:
+```
+ComfyUI/models/TTS/Qwen3-TTS/<MODEL_NAME>/
+```
+This node will not download or create model folders elsewhere.
+
+### Extra Model Paths (Optional)
+
+If you store models outside the default ComfyUI path, configure ComfyUI’s
+`extra_model_paths.yaml` in the ComfyUI root. This node relies on ComfyUI’s
+standard model path system.
+
+Supported location:
+- `ComfyUI/extra_model_paths.yaml`
+
+Example (ComfyUI format):
+```yaml
+comfyui:
+  base_path: D:/AI/ComfyUI-Models
+  tts: models/TTS/  # use lowercase `tts`
+```
+If your ComfyUI build does not expose a `TTS` key, keep the default layout
+`ComfyUI/models/TTS/Qwen3-TTS/` and skip this section.
+
+How to place Qwen3-TTS models in a custom location:
+1) Set `base_path` to your shared models root.
+2) Put Qwen3‑TTS models under:
+   - `<base_path>/TTS/Qwen3-TTS/<MODEL_NAME>/`
+3) Add that root to `extra_model_paths.yaml` (under `tts` as shown above).
+4) Restart ComfyUI.
+
+### Why So Many Files?
+
+Qwen3-TTS follows the standard Hugging Face model layout (config, tokenizer, weights, etc.).
+Multiple JSON/config files are required by Transformers at runtime, so they cannot be safely
+collapsed into a single file without breaking loading.
+
+### Manual Download (Recommended for Slow/Blocked Networks)
+
+You can download models manually and place them into:
+```
+ComfyUI/models/TTS/Qwen3-TTS/<MODEL_NAME>/
+```
+
+Hugging Face CLI example:
+```bash
+pip install -U "huggingface_hub[cli]"
+
+huggingface-cli download Qwen/Qwen3-TTS-Tokenizer-12Hz --local-dir ./Qwen3-TTS-Tokenizer-12Hz
+huggingface-cli download Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice --local-dir ./Qwen3-TTS-12Hz-1.7B-CustomVoice
+huggingface-cli download Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign --local-dir ./Qwen3-TTS-12Hz-1.7B-VoiceDesign
+huggingface-cli download Qwen/Qwen3-TTS-12Hz-1.7B-Base --local-dir ./Qwen3-TTS-12Hz-1.7B-Base
+huggingface-cli download Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice --local-dir ./Qwen3-TTS-12Hz-0.6B-CustomVoice
+huggingface-cli download Qwen/Qwen3-TTS-12Hz-0.6B-Base --local-dir ./Qwen3-TTS-12Hz-0.6B-Base
+```
+
+Then move each downloaded folder into:
+```
+ComfyUI/models/TTS/Qwen3-TTS/
+```
+
+### Manual Download via ModelScope (Mainland China)
+```bash
+pip install -U modelscope
+modelscope download --model Qwen/Qwen3-TTS-Tokenizer-12Hz --local_dir ./Qwen3-TTS-Tokenizer-12Hz
+modelscope download --model Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice --local_dir ./Qwen3-TTS-12Hz-1.7B-CustomVoice
+modelscope download --model Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign --local_dir ./Qwen3-TTS-12Hz-1.7B-VoiceDesign
+modelscope download --model Qwen/Qwen3-TTS-12Hz-1.7B-Base --local_dir ./Qwen3-TTS-12Hz-1.7B-Base
+modelscope download --model Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice --local_dir ./Qwen3-TTS-12Hz-0.6B-CustomVoice
+modelscope download --model Qwen/Qwen3-TTS-12Hz-0.6B-Base --local_dir ./Qwen3-TTS-12Hz-0.6B-Base
+```
 
 This node auto-downloads missing models to:
 ```
