@@ -14,6 +14,7 @@ try:
 except Exception:
     whisper = None
 
+
 _WHISPER_CACHE = {}
 _TEXT_TOKENIZER_CACHE = {}
 _TEXT_TOKENIZER_MODEL_ID = core.MODEL_ID_MAP.get(("CustomVoice", "1.7B")) or core.MODEL_ID_MAP.get(("Base", "1.7B"))
@@ -21,11 +22,14 @@ _TEXT_TOKENIZER_MODEL_ID = core.MODEL_ID_MAP.get(("CustomVoice", "1.7B")) or cor
 _VOICE_INSTRUCT_CACHE = {"mtime": None, "characters": None, "styles": None}
 _VOICE_INSTRUCT_ZH_CACHE = {"mtime": None, "characters": None, "styles": None}
 
+
 def _voice_instruct_path():
     return os.path.join(os.path.dirname(__file__), "voice_instruct.json")
 
+
 def _voice_instruct_zh_path():
     return os.path.join(os.path.dirname(__file__), "voice_instruct_zh.json")
+
 
 def _load_voice_instruct_presets():
     path = _voice_instruct_path()
@@ -54,6 +58,7 @@ def _load_voice_instruct_presets():
     cached["styles"] = styles
     return characters, styles
 
+
 def _build_voice_instruct_options():
     characters, styles = _load_voice_instruct_presets()
     if not characters:
@@ -72,6 +77,7 @@ def _build_voice_instruct_options():
     character_map = {to_character_label(item): (item.get("text") or "").strip() for item in characters}
     style_map = {to_style_label(item): (item.get("text") or "").strip() for item in styles}
     return character_labels, style_labels, character_map, style_map
+
 
 def _load_voice_instruct_presets_zh():
     path = _voice_instruct_zh_path()
@@ -100,6 +106,7 @@ def _load_voice_instruct_presets_zh():
     cached["styles"] = styles
     return characters, styles
 
+
 def _build_voice_instruct_options_zh():
     characters, styles = _load_voice_instruct_presets_zh()
     if not characters:
@@ -119,9 +126,11 @@ def _build_voice_instruct_options_zh():
     style_map = {to_style_label(item): (item.get("text") or "").strip() for item in styles}
     return character_labels, style_labels, character_map, style_map
 
+
 def _sanitize_name(name: str) -> str:
     safe = "".join(c for c in name if c.isalnum() or c in ("-", "_")).strip()
     return safe or "voice"
+
 
 def _default_voice_dir():
     try:
@@ -134,6 +143,7 @@ def _default_voice_dir():
     os.makedirs(path, exist_ok=True)
     return path
 
+
 def _build_prompt(reference_audio, reference_text, model_size, device, precision, x_vector_only):
     model = core._load_model("Base", model_size, device, precision)
     audio_tuple = core._audio_to_tuple(reference_audio)
@@ -144,6 +154,7 @@ def _build_prompt(reference_audio, reference_text, model_size, device, precision
             x_vector_only_mode=bool(x_vector_only),
         )
     return items
+
 
 def _save_voice(prompt_items, save_path: str | None, name: str | None):
     payload = _serialize_prompt_items(prompt_items)
@@ -159,6 +170,7 @@ def _save_voice(prompt_items, save_path: str | None, name: str | None):
     torch.save(payload, path)
     return path
 
+
 def _load_voice_from_file(path: str):
     if not path:
         return None
@@ -173,6 +185,7 @@ def _load_voice_from_file(path: str):
     if isinstance(payload, list) and payload and isinstance(payload[0], dict):
         return _deserialize_prompt_items(payload)
     return payload
+
 
 def _get_prompt_item_class():
     try:
@@ -191,6 +204,7 @@ def _serialize_prompt_item(item):
         "icl_mode": bool(item.icl_mode),
         "ref_text": item.ref_text,
     }
+
 
 def _deserialize_prompt_item(data):
     cls = _get_prompt_item_class()
@@ -251,6 +265,7 @@ def _get_text_tokenizer(model_id: str):
     _TEXT_TOKENIZER_CACHE[model_id] = tok
     return tok
 
+
 class Qwen3TTSVoicesLibrary:
     @classmethod
     def INPUT_TYPES(cls):
@@ -303,6 +318,7 @@ class Qwen3TTSVoicesLibrary:
                 pass
         return (path,)
 
+
 class Qwen3TTSLoadVoice:
     @classmethod
     def INPUT_TYPES(cls):
@@ -337,6 +353,7 @@ class Qwen3TTSLoadVoice:
         if voice_name:
             return (os.path.join(_default_voice_dir(), voice_name),)
         return ("",)
+
 
 class Qwen3TTSWhisperSTT:
     WHISPER_MODELS = [
@@ -397,41 +414,46 @@ class Qwen3TTSWhisperSTT:
                 except Exception:
                     pass
 
-class Qwen3TTSVoiceInstruct:
+
+class Qwen3TTSTextTokenCount:
+    _RATIO = 8.0
+    _MIN_LIMIT = 384
+    _MAX_LIMIT = 4096
+    _ROUND_TO = 64
+
     @classmethod
     def INPUT_TYPES(cls):
-        character_labels, style_labels, _, _ = _build_voice_instruct_options()
         return {
             "required": {
-                "character": (character_labels, {"default": character_labels[0] if character_labels else "Auto", "tooltip": "Voice character preset (from presets/voice_instruct.json)."}),
-                "style": (style_labels, {"default": style_labels[0] if style_labels else "Auto", "tooltip": "Voice style preset (from presets/voice_instruct.json)."}),
-            },
-            "optional": {
-                "custom_instruct": ("STRING", {"default": "", "multiline": True, "tooltip": "Custom instruction. Overrides presets if provided."}),
-            },
+                "text": ("STRING", {"multiline": True, "default": "", "tooltip": "Text to count tokens for."}),
+            }
         }
 
-    RETURN_TYPES = ("STRING",)
-    RETURN_NAMES = ("VOICE_INSTRUCT",)
-    FUNCTION = "build"
+    RETURN_TYPES = ("STRING", "INT")
+    RETURN_NAMES = ("text", "max_new_tokens")
+    FUNCTION = "count"
     CATEGORY = "🧪AILab/🎙️QwenTTS"
 
-    def build(self, character="Auto", style="Auto", custom_instruct=""):
-        text = (custom_instruct or "").strip()
-        if text:
-            return (text,)
-
-        _, _, character_map, style_map = _build_voice_instruct_options()
-        char_text = (character_map.get(character) or "").strip()
-        style_text = (style_map.get(style) or "").strip()
-
-        parts = []
-        if char_text:
-            parts.append(char_text)
-        if style_text:
-            parts.append(style_text)
-
-        return ("\n".join(parts).strip(),)
+    def count(self, text):
+        if not _TEXT_TOKENIZER_MODEL_ID:
+            raise RuntimeError("No suitable Qwen3-TTS model id found for text tokenization.")
+        tokenizer = _get_text_tokenizer(_TEXT_TOKENIZER_MODEL_ID)
+        ids = tokenizer(text or "", add_special_tokens=False).get("input_ids", [])
+        count = int(len(ids))
+        est = int(math.ceil(count * float(self._RATIO)))
+        min_cap = int(self._MIN_LIMIT) if int(self._MIN_LIMIT) > 0 else 0
+        max_cap = int(self._MAX_LIMIT) if int(self._MAX_LIMIT) > 0 else 0
+        if min_cap > 0:
+            est = max(est, min_cap)
+        if max_cap > 0:
+            est = min(est, max_cap)
+        divisor = int(self._ROUND_TO) if int(self._ROUND_TO) > 0 else 1
+        rounded = ((est + divisor - 1) // divisor) * divisor
+        if max_cap > 0 and rounded > max_cap:
+            rounded = max_cap
+        if min_cap > 0 and rounded < min_cap:
+            rounded = min_cap
+        return (text or "", rounded)
 
 
 class Qwen3TTSVoiceInstructZH:
