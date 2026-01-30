@@ -4,7 +4,6 @@ huggingface_hub
 librosa>=0.11.0
 numpy
 openai-whisper
-qwen-asr
 sentencepiece>=0.2.1
 soundfile>=0.13.1
 tiktoken>=0.12.0
