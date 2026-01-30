@@ -1,3 +1,8 @@
+# update v1.1.4
+- new workflow work with new released [ComfyUI-QwenAR](https://github.com/1038lab/ComfyUI-QwenASR)
+![Voice_Clone-with-QwenASR](example_workflows/Voice_Clone-with-QwenASR.jpg) [Workflow](example_workflows/Voice_Clone-with-QwenASR.json)
+# update v1.1.3
+- Dependence update and bug fixed
 # Update v1.1.0
 
 ## Highlights
