@@ -13,7 +13,7 @@
   - [QwenTTS_sample_workflow.json](example_workflows/QwenTTS_sample_workflow.json) — Sample nodes for Voice Clone, Voice Design, and Custom Voice.
   - [Voice_design.json](example_workflows/Voice_design.json) — Advanced Voice Design + preset voice instruct nodes (EN/ZH).
 
-![Clone_voice](example_workflows/Clone_Voice.jpg)
+![Voice_Clone](example_workflows/Voice_Clone.jpg)
 
 ## New / Updated Nodes
 - Create Voice (QwenTTS)
