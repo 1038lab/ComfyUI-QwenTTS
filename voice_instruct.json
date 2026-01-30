@@ -1,0 +1,250 @@
+{
+  "characters": [
+    {
+      "name": "Auto",
+      "text": ""
+    },
+    {
+      "name": "Female",
+      "text": "gender: Female.\nage: Adult."
+    },
+    {
+      "name": "Male",
+      "text": "gender: Male.\nage: Adult."
+    },
+    {
+      "name": "Young Female",
+      "text": "gender: Female.\nage: Young adult."
+    },
+    {
+      "name": "Young Male",
+      "text": "gender: Male.\nage: Young adult."
+    },
+    {
+      "name": "Girl",
+      "text": "gender: Female.\nage: Child."
+    },
+    {
+      "name": "Boy",
+      "text": "gender: Male.\nage: Child."
+    },
+    {
+      "name": "Child",
+      "text": "gender: Neutral.\nage: Child."
+    },
+    {
+      "name": "Teen",
+      "text": "gender: Neutral.\nage: Teen."
+    },
+    {
+      "name": "Adult",
+      "text": "gender: Neutral.\nage: Adult."
+    },
+    {
+      "name": "Senior Female",
+      "text": "gender: Female.\nage: Senior."
+    },
+    {
+      "name": "Senior Male",
+      "text": "gender: Male.\nage: Senior."
+    },
+    {
+      "name": "Narrator",
+      "text": "gender: Neutral.\nage: Adult."
+    },
+    {
+      "name": "Announcer",
+      "text": "gender: Neutral.\nage: Adult."
+    }
+  ],
+  "styles": [
+    {
+      "name": "Auto",
+      "text": ""
+    },
+    {
+      "name": "Warm",
+      "text": "pitch: Mid female/male-agnostic pitch with a gentle downward tilt at phrase ends to convey comfort.\nspeed: Slightly slow, unhurried pacing with soft, even rhythm.\nvolume: Moderate and cozy, never sharp or forceful.\nclarity: Clear articulation with softened consonant edges.\nfluency: Very fluent, no hesitations.\naccent: Neutral.\ntexture: Warm, velvety, smooth timbre.\nemotion: Reassuring and kind.\ntone: Gentle, inviting, and supportive.\npersonality: Empathetic, patient, and caring.\nstyle note: Make the listener feel safe and welcomed."
+    },
+    {
+      "name": "Gentle",
+      "text": "pitch: Slightly higher than neutral with soft upward inflections.\nspeed: Slow to moderate, flowing and relaxed.\nvolume: Soft and controlled, close to intimate level.\nclarity: Smooth, delicate pronunciation without harsh edges.\nfluency: Steady and continuous, no stutters.\naccent: Neutral.\ntexture: Airy, light, and tender.\nemotion: Tender and soothing.\ntone: Soft, calm, and comforting.\npersonality: Kind, gentle, and considerate.\nstyle note: Keep every phrase soft and reassuring."
+    },
+    {
+      "name": "Calm",
+      "text": "pitch: Mid-range and stable with minimal pitch swings.\nspeed: Slow to moderate, consistent pacing.\nvolume: Even, medium-soft, with no sudden peaks.\nclarity: High clarity and controlled diction.\nfluency: Very fluent, steady delivery.\naccent: Neutral.\ntexture: Smooth and even, low grain.\nemotion: Calm and composed.\ntone: Relaxed and steady.\npersonality: Grounded, patient, and composed.\nstyle note: Avoid dramatic emphasis; keep a stable rhythm."
+    },
+    {
+      "name": "Cheerful",
+      "text": "pitch: Slightly higher pitch with bright upward inflections.\nspeed: Brisk and lively, with light bounce.\nvolume: Medium-loud, energetic but not shouting.\nclarity: Crisp, distinct pronunciation.\nfluency: Very fluent with playful rhythm.\naccent: Neutral.\ntexture: Bright and sparkling.\nemotion: Happy and upbeat.\ntone: Positive, sunny, and enthusiastic.\npersonality: Friendly, bubbly, and engaging.\nstyle note: Smile through the delivery."
+    },
+    {
+      "name": "Friendly",
+      "text": "pitch: Natural mid-range with gentle rises on greetings.\nspeed: Moderate pace, conversational timing.\nvolume: Medium, warm and approachable.\nclarity: Clear, natural articulation.\nfluency: Smooth and relaxed.\naccent: Neutral.\ntexture: Soft and pleasant.\nemotion: Warm and welcoming.\ntone: Casual and inviting.\npersonality: Approachable, kind, and open.\nstyle note: Sound like you\u2019re chatting with a friend."
+    },
+    {
+      "name": "Serious",
+      "text": "pitch: Lower-mid pitch with controlled downward inflections.\nspeed: Moderate, deliberate pacing with purposeful pauses.\nvolume: Medium and firm, no softness.\nclarity: Highly articulate, precise consonants.\nfluency: Very fluent, no fillers.\naccent: Neutral.\ntexture: Clean, solid, and focused.\nemotion: Serious and focused.\ntone: Firm, composed, and authoritative.\npersonality: Confident, disciplined, and direct.\nstyle note: Keep emphasis controlled and decisive."
+    },
+    {
+      "name": "Sad",
+      "text": "pitch: Slightly lower pitch with downward inflections.\nspeed: Slow, with longer pauses between phrases.\nvolume: Soft and restrained.\nclarity: Clear but subdued articulation.\nfluency: Smooth, with gentle trailing ends.\naccent: Neutral.\ntexture: Dim, slightly breathy.\nemotion: Sorrowful and heavy.\ntone: Somber and plaintive.\npersonality: Melancholic and reflective.\nstyle note: Let the emotion linger at the ends of sentences."
+    },
+    {
+      "name": "Angry",
+      "text": "pitch: Tense, slightly higher pitch with sharp rises.\nspeed: Fast and clipped, with sudden emphasis.\nvolume: Loud and forceful.\nclarity: Very sharp, biting articulation.\nfluency: Fluent with aggressive rhythm.\naccent: Neutral.\ntexture: Tight and edgy.\nemotion: Angry and confrontational.\ntone: Harsh, forceful, and intense.\npersonality: Assertive, explosive, and uncompromising.\nstyle note: Keep the intensity high but controlled."
+    },
+    {
+      "name": "Excited",
+      "text": "pitch: Higher pitch with frequent upward inflections.\nspeed: Fast-paced with energetic momentum.\nvolume: Medium-loud to loud, rising on key words.\nclarity: Crisp and bright articulation.\nfluency: Very fluent, lively rhythm.\naccent: Neutral.\ntexture: Bright and vivid.\nemotion: Enthusiastic and excited.\ntone: Upbeat, celebratory, and lively.\npersonality: Energetic, extroverted, and engaging.\nstyle note: Add punchy emphasis and joyful momentum."
+    },
+    {
+      "name": "Soft",
+      "text": "pitch: Mid to slightly high, with gentle downward endings.\nspeed: Slow to moderate, smooth and unhurried.\nvolume: Soft and delicate, consistently low.\nclarity: Clear but lightly feathered consonants.\nfluency: Very fluent, flowing phrases.\naccent: Neutral.\ntexture: Light, airy, and velvety.\nemotion: Tender and calm.\ntone: Intimate and soothing.\npersonality: Gentle, caring, and calm.\nstyle note: Keep volume low with soft edges."
+    },
+    {
+      "name": "Deep",
+      "text": "pitch: Low pitch with grounded resonance.\nspeed: Moderate, steady pace.\nvolume: Medium to firm, with stable projection.\nclarity: Clear and precise articulation.\nfluency: Very fluent, controlled delivery.\naccent: Neutral.\ntexture: Rich, resonant, and weighty.\nemotion: Composed and confident.\ntone: Solid, grounded, and authoritative.\npersonality: Reliable, confident, and calm.\nstyle note: Emphasize low resonance without muddiness."
+    },
+    {
+      "name": "Clear",
+      "text": "pitch: Mid-range and stable.\nspeed: Moderate pace with even rhythm.\nvolume: Medium and consistent.\nclarity: Extremely clear, sharp enunciation.\nfluency: Highly fluent, no slurring.\naccent: Neutral.\ntexture: Clean and crisp.\nemotion: Neutral and focused.\ntone: Professional and precise.\npersonality: Methodical, reliable, and composed.\nstyle note: Prioritize intelligibility above all."
+    },
+    {
+      "name": "Emotional",
+      "text": "pitch: Mid-range with expressive rises and falls.\nspeed: Varied pacing to match emotion.\nvolume: Dynamic, rising with emotional peaks.\nclarity: Clear with expressive emphasis.\nfluency: Fluent with emotional breath and pauses.\naccent: Neutral.\ntexture: Rich and textured.\nemotion: Strong and heartfelt.\ntone: Expressive, heartfelt, and vivid.\npersonality: Passionate, open, and sincere.\nstyle note: Let emotion color phrasing and rhythm."
+    },
+    {
+      "name": "Dramatic",
+      "text": "pitch: Wide pitch range with strong inflections.\nspeed: Deliberate with dramatic pauses.\nvolume: Wide dynamic range, from soft to strong.\nclarity: Crisp, theatrical articulation.\nfluency: Fluent with stylized cadence.\naccent: Neutral.\ntexture: Bold and resonant.\nemotion: High drama and intensity.\ntone: Theatrical and intense.\npersonality: Expressive, bold, and commanding.\nstyle note: Lean into dramatic contrast and emphasis."
+    },
+    {
+      "name": "Whisper",
+      "text": "pitch: Mid pitch but softened, with minimal inflection.\nspeed: Slow to moderate, intimate pacing.\nvolume: Very soft, whisper-level.\nclarity: Clear yet delicate articulation.\nfluency: Smooth, continuous flow.\naccent: Neutral.\ntexture: Whispery, airy, breath-forward.\nemotion: Secretive and intimate.\ntone: Quiet, close, and confidential.\npersonality: Subtle, gentle, and private.\nstyle note: Keep breath audible but intelligible."
+    },
+    {
+      "name": "Breathy",
+      "text": "pitch: Mid pitch with soft, airy inflections.\nspeed: Slow to moderate, gentle pacing.\nvolume: Soft, close-mic feel.\nclarity: Clear but softened with breath.\nfluency: Smooth, continuous flow.\naccent: Neutral.\ntexture: Airy, whisper-adjacent breathiness.\nemotion: Intimate and delicate.\ntone: Soft, intimate, and tender.\npersonality: Subtle, gentle, and affectionate.\nstyle note: Keep audible breath without losing clarity."
+    },
+    {
+      "name": "Husky",
+      "text": "pitch: Low to mid-low pitch with subtle grit.\nspeed: Moderate pace, slightly weighted delivery.\nvolume: Medium with firm projection.\nclarity: Clear with textured consonants.\nfluency: Very fluent, grounded rhythm.\naccent: Neutral.\ntexture: Husky, smoky, lightly raspy.\nemotion: Mature and confident.\ntone: Cool, smoky, and composed.\npersonality: Worldly, confident, and steady.\nstyle note: Add texture without harshness."
+    },
+    {
+      "name": "Authoritative",
+      "text": "pitch: Low to mid pitch with firm downward emphasis.\nspeed: Moderate, deliberate pace.\nvolume: Firm and projecting.\nclarity: Very clear, decisive articulation.\nfluency: Highly fluent, no hesitation.\naccent: Neutral.\ntexture: Solid, resonant.\nemotion: Confident and controlled.\ntone: Commanding and authoritative.\npersonality: Strong, decisive, and reliable.\nstyle note: Emphasize control and certainty."
+    },
+    {
+      "name": "Storytelling",
+      "text": "pitch: Mid-range with gentle melodic contour.\nspeed: Moderate pace with natural story rhythm.\nvolume: Medium, slightly dynamic.\nclarity: Clear and expressive.\nfluency: Fluent, with narrative pauses.\naccent: Neutral.\ntexture: Warm and natural.\nemotion: Engaging and inviting.\ntone: Narrative, warm, and expressive.\npersonality: Engaging, friendly, and vivid.\nstyle note: Use gentle emphasis to guide the listener."
+    },
+    {
+      "name": "News Anchor",
+      "text": "pitch: Mid pitch, stable and neutral.\nspeed: Moderate, steady newsroom cadence.\nvolume: Medium with consistent projection.\nclarity: Extremely clear, crisp diction.\nfluency: Very fluent, no fillers.\naccent: Standard broadcast neutral.\ntexture: Clean and bright.\nemotion: Neutral and controlled.\ntone: Professional, factual, composed.\npersonality: Confident, reliable, and precise.\nstyle note: Maintain broadcast-style pacing and neutrality."
+    },
+    {
+      "name": "Documentary",
+      "text": "pitch: Mid to slightly low pitch with steady contour.\nspeed: Slow to moderate, measured delivery.\nvolume: Medium, controlled projection.\nclarity: Very clear, informative diction.\nfluency: Very fluent, steady cadence.\naccent: Neutral.\ntexture: Smooth, documentary-style narration.\nemotion: Neutral, informative, restrained.\ntone: Objective and authoritative.\npersonality: Calm, knowledgeable, and composed.\nstyle note: Maintain a factual, documentary cadence."
+    },
+    {
+      "name": "Customer Support",
+      "text": "pitch: Mid-range with gentle rises on reassurance.\nspeed: Moderate and patient, slightly slower on key info.\nvolume: Medium-soft, friendly and non-intrusive.\nclarity: Clear and careful articulation.\nfluency: Smooth and polite, no rushing.\naccent: Neutral.\ntexture: Soft, pleasant, and calm.\nemotion: Patient and supportive.\ntone: Reassuring and helpful.\npersonality: Courteous, caring, and attentive.\nstyle note: Keep a reassuring, service-oriented cadence."
+    },
+    {
+      "name": "Teacher",
+      "text": "pitch: Mid pitch with slight emphasis on key terms.\nspeed: Moderate, with gentle pauses for clarity.\nvolume: Medium and steady.\nclarity: Very clear, didactic articulation.\nfluency: Smooth, structured flow.\naccent: Neutral.\ntexture: Clean and guiding.\nemotion: Encouraging and calm.\ntone: Instructional and supportive.\npersonality: Patient, knowledgeable, and helpful.\nstyle note: Explain with clarity and gentle emphasis."
+    },
+    {
+      "name": "Audiobook",
+      "text": "pitch: Mid-range with subtle expressive contour.\nspeed: Moderate, steady longform rhythm.\nvolume: Medium, consistent and comfortable.\nclarity: Clear and smooth.\nfluency: Very fluent, longform pacing.\naccent: Neutral.\ntexture: Warm and even.\nemotion: Mildly expressive.\ntone: Narrative and immersive.\npersonality: Calm, engaging, and consistent.\nstyle note: Keep a smooth, sustained narration flow."
+    },
+    {
+      "name": "Energetic",
+      "text": "pitch: Slightly higher with lively rises.\nspeed: Fast, brisk pacing.\nvolume: Medium-loud to loud.\nclarity: Crisp and vivid articulation.\nfluency: Highly fluent, energetic rhythm.\naccent: Neutral.\ntexture: Bright and dynamic.\nemotion: Energetic and spirited.\ntone: Lively and enthusiastic.\npersonality: Active, extroverted, and upbeat.\nstyle note: Maintain high energy without losing clarity."
+    },
+    {
+      "name": "Relaxed",
+      "text": "pitch: Mid-low with gentle downward inflections.\nspeed: Slow to moderate, unhurried.\nvolume: Soft to medium.\nclarity: Clear but mellow articulation.\nfluency: Smooth and easygoing.\naccent: Neutral.\ntexture: Smooth and mellow.\nemotion: Relaxed and laid-back.\ntone: Easygoing and calm.\npersonality: Chill, warm, and casual.\nstyle note: Keep a laid-back, natural rhythm."
+    },
+    {
+      "name": "Playful",
+      "text": "pitch: Mid to slightly high with bouncy inflections.\nspeed: Moderate to brisk with playful timing.\nvolume: Medium, with light emphasis on punchlines.\nclarity: Clear and expressive.\nfluency: Fluent with playful pauses.\naccent: Neutral.\ntexture: Bright and light.\nemotion: Playful and lighthearted.\ntone: Fun, cheeky, and lively.\npersonality: Playful, curious, and energetic.\nstyle note: Add subtle playful inflections and rhythm."
+    },
+    {
+      "name": "Mysterious",
+      "text": "pitch: Low to mid-low, with subtle rises.\nspeed: Slow, deliberate pacing.\nvolume: Soft to medium, restrained.\nclarity: Clear but slightly hushed articulation.\nfluency: Smooth, with suspenseful pauses.\naccent: Neutral.\ntexture: Dark, smooth, slightly smoky.\nemotion: Subtle and enigmatic.\ntone: Mysterious and suspenseful.\npersonality: Reserved, intriguing, and calm.\nstyle note: Use silence and softness to build tension."
+    },
+    {
+      "name": "Romantic",
+      "text": "pitch: Mid with gentle warmth.\nspeed: Slow to moderate, tender pacing.\nvolume: Soft to medium.\nclarity: Smooth, rounded articulation.\nfluency: Very fluent and flowing.\naccent: Neutral.\ntexture: Warm and velvety.\nemotion: Tender and affectionate.\ntone: Soft, intimate, and warm.\npersonality: Caring, gentle, and sincere.\nstyle note: Keep a soft, affectionate warmth throughout."
+    },
+    {
+      "name": "Inspirational",
+      "text": "pitch: Mid with confident upward emphasis.\nspeed: Moderate with motivational pacing.\nvolume: Medium-loud, uplifting projection.\nclarity: Very clear, strong diction.\nfluency: Highly fluent, steady rhythm.\naccent: Neutral.\ntexture: Bright and confident.\nemotion: Uplifting and encouraging.\ntone: Motivational and empowering.\npersonality: Confident, inspiring, and positive.\nstyle note: Build momentum and resolve in delivery."
+    },
+    {
+      "name": "Formal",
+      "text": "pitch: Mid-range with controlled downward inflections.\nspeed: Moderate, steady, and precise.\nvolume: Medium, professional projection.\nclarity: Very clear, crisp diction.\nfluency: Highly fluent, no fillers.\naccent: Neutral.\ntexture: Clean and polished.\nemotion: Neutral and composed.\ntone: Formal and professional.\npersonality: Polished, disciplined, and reliable.\nstyle note: Maintain professional distance and precision."
+    },
+    {
+      "name": "Casual",
+      "text": "pitch: Natural mid-range with relaxed inflections.\nspeed: Moderate, conversational pace.\nvolume: Medium, relaxed.\nclarity: Clear but natural, not overly formal.\nfluency: Smooth and easygoing.\naccent: Neutral.\ntexture: Natural and unforced.\nemotion: Relaxed and friendly.\ntone: Casual and conversational.\npersonality: Easygoing, approachable, and natural.\nstyle note: Keep it natural and informal."
+    },
+    {
+      "name": "ASMR",
+      "text": "pitch: Mid-range with minimal inflection.\nspeed: Slow, intimate pacing.\nvolume: Very soft, close-mic level.\nclarity: Clear but whisper-soft.\nfluency: Smooth, breath-forward flow.\naccent: Neutral.\ntexture: Close, airy, detailed.\nemotion: Soothing and gentle.\ntone: Intimate and calming.\npersonality: Soft, comforting, and attentive.\nstyle note: Emphasize closeness and soft breath texture."
+    },
+    {
+      "name": "Noir",
+      "text": "pitch: Low pitch with heavy downward inflections.\nspeed: Slow, deliberate pacing.\nvolume: Medium, slightly hushed.\nclarity: Clear but smoky articulation.\nfluency: Smooth, with lingering pauses.\naccent: Neutral or subtle American noir.\ntexture: Smoky, gritty, shadowed.\nemotion: World-weary and cynical.\ntone: Dark, moody, and mysterious.\npersonality: Jaded, reflective, and intense.\nstyle note: Lean into noir atmosphere and grit."
+    },
+    {
+      "name": "Cinematic",
+      "text": "pitch: Wide range with dramatic rises.\nspeed: Varied pacing, cinematic swells.\nvolume: Wide dynamic range from soft to powerful.\nclarity: Clear with dramatic emphasis.\nfluency: Fluent, flowing, cinematic rhythm.\naccent: Neutral.\ntexture: Big, resonant, and lush.\nemotion: Epic and expressive.\ntone: Grand, dramatic, and immersive.\npersonality: Bold, evocative, and intense.\nstyle note: Build cinematic arcs and strong crescendos."
+    },
+    {
+      "name": "Trailer",
+      "text": "pitch: Mid-low with strong downward emphasis.\nspeed: Punctuated, with strong pauses between phrases.\nvolume: Bold and loud on key words.\nclarity: Very clear, punchy articulation.\nfluency: Fluent with punchy cadence.\naccent: Neutral.\ntexture: Powerful and gritty.\nemotion: Intense and commanding.\ntone: Epic, promotional, and forceful.\npersonality: Bold, commanding, and dramatic.\nstyle note: Use strong emphasis and dramatic pauses."
+    },
+    {
+      "name": "Motivational",
+      "text": "pitch: Mid with confident upward inflections.\nspeed: Moderate with uplifting momentum.\nvolume: Medium-loud, energetic projection.\nclarity: Clear and assertive diction.\nfluency: Very fluent, steady drive.\naccent: Neutral.\ntexture: Bright and confident.\nemotion: Encouraging and empowering.\ntone: Inspirational and strong.\npersonality: Confident, uplifting, and supportive.\nstyle note: Maintain an uplifting, motivating cadence."
+    },
+    {
+      "name": "Robotic",
+      "text": "pitch: Mid with minimal variation.\nspeed: Moderate and uniform.\nvolume: Medium and constant.\nclarity: Very clear, mechanical articulation.\nfluency: Fluent but rigid.\naccent: Neutral.\ntexture: Synthetic, flat, and metallic.\nemotion: Minimal emotion.\ntone: Monotone and mechanical.\npersonality: Neutral, machine-like, and clinical.\nstyle note: Keep inflection minimal and rhythm consistent."
+    },
+    {
+      "name": "Vintage Radio",
+      "text": "pitch: Mid with slight nasal quality.\nspeed: Moderate, classic broadcast cadence.\nvolume: Medium with consistent projection.\nclarity: Clear with a retro diction style.\nfluency: Smooth and practiced.\naccent: Neutral or classic broadcast.\ntexture: Narrow-band, crisp, lightly compressed.\nemotion: Neutral to upbeat.\ntone: Retro, bright, and professional.\npersonality: Polished, nostalgic, and confident.\nstyle note: Evoke old radio tone and clarity."
+    },
+    {
+      "name": "Lullaby",
+      "text": "pitch: Slightly higher, gentle contour.\nspeed: Very slow, soothing pacing.\nvolume: Very soft and tender.\nclarity: Soft but intelligible.\nfluency: Smooth, flowing, with gentle pauses.\naccent: Neutral.\ntexture: Soft, warm, and airy.\nemotion: Soothing and comforting.\ntone: Gentle, calm, and nurturing.\npersonality: Caring, patient, and tender.\nstyle note: Keep everything soft, slow, and comforting."
+    },
+    {
+      "name": "Comedy",
+      "text": "pitch: Mid-range with playful rises and dips.\nspeed: Moderate with comedic timing pauses.\nvolume: Medium with emphasis on punchlines.\nclarity: Clear and expressive articulation.\nfluency: Fluent with rhythmic comedic beats.\naccent: Neutral.\ntexture: Light and bright.\nemotion: Humorous and lighthearted.\ntone: Playful and witty.\npersonality: Fun, cheeky, and lively.\nstyle note: Use timing and emphasis to land jokes."
+    },
+    {
+      "name": "Interview",
+      "text": "pitch: Natural mid-range with subtle emphasis.\nspeed: Moderate, conversational pace.\nvolume: Medium, balanced.\nclarity: Clear and natural articulation.\nfluency: Smooth and conversational.\naccent: Neutral.\ntexture: Natural and relaxed.\nemotion: Calm and attentive.\ntone: Conversational and inquisitive.\npersonality: Curious, friendly, and engaged.\nstyle note: Keep a natural Q&A rhythm."
+    },
+    {
+      "name": "Poetic",
+      "text": "pitch: Mid-range with gentle melodic contour.\nspeed: Slow to moderate with lyrical pacing.\nvolume: Soft to medium, delicate.\nclarity: Clear but softly shaped consonants.\nfluency: Fluent, with measured poetic pauses.\naccent: Neutral.\ntexture: Smooth and tender.\nemotion: Reflective and expressive.\ntone: Lyrical and evocative.\npersonality: Thoughtful, sensitive, and artistic.\nstyle note: Let the rhythm feel musical and flowing."
+    },
+    {
+      "name": "Philosophical",
+      "text": "pitch: Mid-low with gentle downward inflections.\nspeed: Slow and contemplative.\nvolume: Medium-soft, restrained.\nclarity: Clear, deliberate articulation.\nfluency: Very fluent with thoughtful pauses.\naccent: Neutral.\ntexture: Smooth and calm.\nemotion: Reflective and calm.\ntone: Thoughtful and introspective.\npersonality: Wise, reflective, and composed.\nstyle note: Allow space for reflection between phrases."
+    },
+    {
+      "name": "Sportscaster",
+      "text": "pitch: Mid to slightly high with excited rises.\nspeed: Fast, energetic pacing.\nvolume: Medium-loud to loud.\nclarity: Clear, punchy diction.\nfluency: Fluent, rapid delivery.\naccent: Neutral.\ntexture: Bright and dynamic.\nemotion: Excited and animated.\ntone: Energetic and enthusiastic.\npersonality: Excitable, lively, and engaging.\nstyle note: Keep momentum high with strong emphasis."
+    },
+    {
+      "name": "Meditation",
+      "text": "pitch: Mid-low with minimal inflection.\nspeed: Very slow and steady.\nvolume: Very soft and soothing.\nclarity: Clear, gentle articulation.\nfluency: Smooth, continuous flow.\naccent: Neutral.\ntexture: Soft, airy, and calming.\nemotion: Tranquil and serene.\ntone: Calm and peaceful.\npersonality: Gentle, grounded, and soothing.\nstyle note: Maintain a slow, relaxing cadence throughout."
+    }
+  ]
+}

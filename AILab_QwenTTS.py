@@ -1,11 +1,23 @@
 # ComfyUI-QwenTTS
-# Custom nodes for Qwen3-TTS (CustomVoice / VoiceDesign / VoiceClone)
+# A clean, efficient ComfyUI custom node for Qwen3-TTS (Text-to-Speech) functionality.
+# This implementation provides high-quality speech generation and voice cloning
+# capabilities using the Qwen3-TTS model family.
+#
+# Models License Notice:
+# - Qwen3-TTS: Apache-2.0 License (https://huggingface.co/collections/Qwen/qwen3-tts)
+#
+# This integration script follows GPL-3.0 License.
+# When using or modifying this code, please respect both the original model licenses
+# and this integration's license terms.
+#
+# Source: https://github.com/1038lab/ComfyUI-QwenTTS
 
 import os
 import sys
 from pathlib import Path
 from typing import Dict, Any, Tuple, Optional
 from contextlib import nullcontext
+from collections import OrderedDict
 
 import numpy as np
 import torch
@@ -173,7 +185,8 @@ MODEL_ID_MAP = {
     ("VoiceDesign", "1.7B"): "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
 }
 TOKENIZER_ID = "Qwen/Qwen3-TTS-Tokenizer-12Hz"
-_MODEL_CACHE: Dict[Tuple[str, str, str, str], Any] = {}
+ATTENTION_OPTIONS = ["auto", "sage_attn", "flash_attn", "sdpa", "eager"]
+_MODEL_CACHE: Dict[Tuple[str, str, str, str, str], Any] = {}
 
 
 def _available_devices():
@@ -184,6 +197,82 @@ def _available_devices():
         devices.append("mps")
     devices.append("cpu")
     return devices
+
+
+def _flash_attn_available():
+    try:
+        import flash_attn  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
+def _sage_attn_available():
+    try:
+        import sageattention  # noqa: F401
+        return True
+    except Exception:
+        return False
+
+
+def _resolve_attention_impl(attention: str, device: str):
+    if not device.startswith("cuda"):
+        return None
+    if attention == "auto":
+        if _flash_attn_available():
+            return "flash_attention_2"
+        if _sage_attn_available():
+            return "sage_attn"
+        return "sdpa"
+    if attention == "sage_attn":
+        return "sage_attn"
+    if attention == "flash_attn":
+        if _flash_attn_available():
+            return "flash_attention_2"
+        return None
+    if attention == "sdpa":
+        return "sdpa"
+    if attention == "eager":
+        return "eager"
+    return None
+
+
+def _patch_sage_attention(model):
+    try:
+        from sageattention import sageattn
+    except Exception:
+        raise RuntimeError("sageattention is not installed. Please install it to use sage_attn.")
+
+    patched = 0
+    for name, module in model.model.named_modules():
+        if getattr(module, "_qwen_sage_patched", False):
+            continue
+        if "attn" not in name.lower() and "Attention" not in type(module).__name__:
+            continue
+        if not hasattr(module, "forward"):
+            continue
+
+        original_forward = module.forward
+
+        def make_sage_forward(orig_forward):
+            def sage_forward(*args, **kwargs):
+                if len(args) >= 3:
+                    q, k, v = args[0], args[1], args[2]
+                    if hasattr(q, "shape") and hasattr(k, "shape") and hasattr(v, "shape"):
+                        attn_mask = kwargs.get("attention_mask", None)
+                        try:
+                            return sageattn(q, k, v, is_causal=False, attn_mask=attn_mask)
+                        except Exception:
+                            return orig_forward(*args, **kwargs)
+                return orig_forward(*args, **kwargs)
+
+            return sage_forward
+
+        module.forward = make_sage_forward(original_forward)
+        module._qwen_sage_patched = True
+        patched += 1
+
+    print(f"[Qwen3-TTS] sage_attn patched modules: {patched}")
 
 
 def _resolve_device(device_choice: str):
@@ -223,8 +312,19 @@ def _maybe_autocast(device: str, precision: str):
 
 
 def _model_store_root():
+    tts_paths = _get_tts_paths()
+    if tts_paths:
+        return os.path.join(tts_paths[0], "Qwen3-TTS")
     base = folder_paths.models_dir
     return os.path.join(base, "TTS", "Qwen3-TTS")
+
+
+def _get_tts_paths():
+    folders = getattr(folder_paths, "folder_names_and_paths", {}) or {}
+    for key in ("tts", "TTS"):
+        if key in folders:
+            return folder_paths.get_folder_paths(key) or []
+    return []
 
 
 def _find_local_model(model_id: str) -> Optional[str]:
@@ -234,7 +334,7 @@ def _find_local_model(model_id: str) -> Optional[str]:
     if os.path.isdir(default_root):
         candidates.append(os.path.join(default_root, model_name))
     try:
-        tts_roots = folder_paths.get_folder_paths("TTS") or []
+        tts_roots = _get_tts_paths()
         for root in tts_roots:
             candidates.append(os.path.join(root, "Qwen3-TTS", model_name))
     except Exception:
@@ -272,7 +372,7 @@ def _resolve_model_source(model_id: str) -> str:
     return model_id
 
 
-def _load_model(model_type: str, model_size: str, device_choice: str, precision: str):
+def _load_model(model_type: str, model_size: str, device_choice: str, precision: str, attention: str = "auto"):
     if model_type == "VoiceDesign" and model_size != "1.7B":
         raise ValueError("VoiceDesign only supports 1.7B models.")
     if Qwen3TTSModel is None:
@@ -291,7 +391,8 @@ def _load_model(model_type: str, model_size: str, device_choice: str, precision:
     device = _resolve_device(device_choice)
     dtype = _resolve_dtype(precision, device)
 
-    cache_key = (model_type, model_size, device, precision)
+    attn_impl = _resolve_attention_impl(attention, device)
+    cache_key = (model_type, model_size, device, precision, attn_impl or "default")
     if cache_key in _MODEL_CACHE:
         print(f"[Qwen3-TTS] Using cached model: {model_type} {model_size} on {device} ({precision})")
         return _MODEL_CACHE[cache_key]
@@ -305,15 +406,24 @@ def _load_model(model_type: str, model_size: str, device_choice: str, precision:
         except Exception:
             pass
     try:
-        kwargs = {"device_map": device, "dtype": dtype}
-        if device.startswith("cuda"):
-            kwargs["attn_implementation"] = "flash_attention_2"
-        model = Qwen3TTSModel.from_pretrained(source, **kwargs)
-        if device.startswith("cuda") and "attn_implementation" in kwargs:
-            print("[Qwen3-TTS] flash_attention_2 enabled")
+        if attn_impl == "sage_attn":
+            if not _sage_attn_available():
+                print("[Qwen3-TTS] sage_attn not available. Install 'sageattention' or choose another attention.")
+                attn_impl = None
+            else:
+                model = Qwen3TTSModel.from_pretrained(source, device_map=device, dtype=dtype)
+                _patch_sage_attention(model)
+                print("[Qwen3-TTS] attention: sage_attn")
+        if attn_impl != "sage_attn":
+            kwargs = {"device_map": device, "dtype": dtype}
+            if attn_impl:
+                kwargs["attn_implementation"] = attn_impl
+            model = Qwen3TTSModel.from_pretrained(source, **kwargs)
+            if device.startswith("cuda") and attn_impl:
+                print(f"[Qwen3-TTS] attention: {attn_impl}")
     except Exception as e:
         if "attn_implementation" in str(e) or "flash" in str(e).lower():
-            print("[Qwen3-TTS] flash_attention_2 unavailable, fallback to default attention")
+            print("[Qwen3-TTS] attention unavailable, fallback to default attention")
             model = Qwen3TTSModel.from_pretrained(source, device_map=device, dtype=dtype)
         else:
             raise e
@@ -329,6 +439,48 @@ def _set_seed(seed: int):
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
     np.random.seed(seed % (2 ** 32))
+
+
+def _get_prompt_item_class():
+    try:
+        _load_qwen3_model()
+        module = __import__("qwen_tts.inference.qwen3_tts_model", fromlist=["VoiceClonePromptItem"])
+        return getattr(module, "VoiceClonePromptItem", None)
+    except Exception:
+        return None
+
+
+def _deserialize_prompt_item(data):
+    cls = _get_prompt_item_class()
+    if cls is None:
+        return data
+    return cls(
+        ref_code=data.get("ref_code"),
+        ref_spk_embedding=data.get("ref_spk_embedding"),
+        x_vector_only_mode=bool(data.get("x_vector_only_mode")),
+        icl_mode=bool(data.get("icl_mode")),
+        ref_text=data.get("ref_text"),
+    )
+
+
+def _deserialize_prompt_items(items):
+    return [_deserialize_prompt_item(item) for item in items]
+
+
+def _load_voice_from_file(path: str):
+    if not path:
+        return None
+    try:
+        data = torch.load(path, map_location="cpu", weights_only=True)
+    except TypeError:
+        data = torch.load(path, map_location="cpu")
+    if isinstance(data, dict) and "prompt" in data:
+        payload = data["prompt"]
+    else:
+        payload = data
+    if isinstance(payload, list) and payload and isinstance(payload[0], dict):
+        return _deserialize_prompt_items(payload)
+    return payload
 
 
 def _audio_to_tuple(audio: Any) -> Tuple[np.ndarray, int]:
@@ -411,12 +563,13 @@ def _custom_voice_generate(
     top_k: int = 50,
     temperature: float = 0.9,
     repetition_penalty: float = 1.0,
+    attention: str = "auto",
     unload_models: bool = False,
 ):
     if not text or not text.strip():
         raise ValueError("Text is required")
     _set_seed(seed)
-    model = _load_model("CustomVoice", model_size, device, precision)
+    model = _load_model("CustomVoice", model_size, device, precision, attention)
     mapped_lang = LANGUAGE_MAP.get(language, "auto")
     with _maybe_autocast(_resolve_device(device), precision):
         wavs, sr = model.generate_custom_voice(
@@ -435,6 +588,12 @@ def _custom_voice_generate(
     if unload_models:
         _MODEL_CACHE.clear()
         model_management.soft_empty_cache()
+        try:
+            import gc
+            gc.collect()
+            gc.collect()
+        except Exception:
+            pass
     return (audio,)
 
 
@@ -452,12 +611,13 @@ def _voice_design_generate(
     top_k: int = 50,
     temperature: float = 0.9,
     repetition_penalty: float = 1.0,
+    attention: str = "auto",
     unload_models: bool = False,
 ):
     if not text or not text.strip() or not instruct or not instruct.strip():
         raise ValueError("Text and instruct are required")
     _set_seed(seed)
-    model = _load_model("VoiceDesign", model_size, device, precision)
+    model = _load_model("VoiceDesign", model_size, device, precision, attention)
     mapped_lang = LANGUAGE_MAP.get(language, "auto")
     with _maybe_autocast(_resolve_device(device), precision):
         wavs, sr = model.generate_voice_design(
@@ -475,6 +635,12 @@ def _voice_design_generate(
     if unload_models:
         _MODEL_CACHE.clear()
         model_management.soft_empty_cache()
+        try:
+            import gc
+            gc.collect()
+            gc.collect()
+        except Exception:
+            pass
     return (audio,)
 
 
@@ -488,6 +654,7 @@ def _voice_clone_generate(
     reference_text: str = "",
     x_vector_only: bool = False,
     allow_empty_ref_text: bool = False,
+    voice: Any = None,
     seed: int = -1,
     max_new_tokens: int = 2048,
     do_sample: bool = True,
@@ -495,37 +662,66 @@ def _voice_clone_generate(
     top_k: int = 50,
     temperature: float = 0.9,
     repetition_penalty: float = 1.0,
+    attention: str = "auto",
     unload_models: bool = False,
 ):
     if not target_text or not target_text.strip():
         raise ValueError("Target text is required")
-    if (not reference_text or not reference_text.strip()) and not x_vector_only:
-        if allow_empty_ref_text:
-            x_vector_only = True
-        else:
-            raise ValueError("reference_text is required unless x_vector_only is enabled")
+    prompt = None
+    if voice is not None:
+        if isinstance(voice, str) and voice.strip():
+            prompt = _load_voice_from_file(voice.strip())
+        elif isinstance(voice, list):
+            prompt = voice
+    if prompt is None:
+        if (not reference_text or not reference_text.strip()) and not x_vector_only:
+            if allow_empty_ref_text:
+                x_vector_only = True
+            else:
+                raise ValueError("reference_text is required unless x_vector_only is enabled")
+        if reference_audio is None:
+            raise ValueError("reference_audio is required when voice is not provided")
     _set_seed(seed)
-    model = _load_model("Base", model_size, device, precision)
+    model = _load_model("Base", model_size, device, precision, attention)
     mapped_lang = LANGUAGE_MAP.get(language, "auto")
-    audio_tuple = _audio_to_tuple(reference_audio)
     with _maybe_autocast(_resolve_device(device), precision):
-        wavs, sr = model.generate_voice_clone(
-            text=target_text,
-            language=mapped_lang,
-            ref_audio=audio_tuple,
-            ref_text=reference_text.strip() if reference_text and reference_text.strip() else None,
-            x_vector_only_mode=bool(x_vector_only),
-            max_new_tokens=max_new_tokens,
-            do_sample=do_sample,
-            top_p=top_p,
-            top_k=top_k,
-            temperature=temperature,
-            repetition_penalty=repetition_penalty,
-        )
+        if prompt is not None:
+            wavs, sr = model.generate_voice_clone(
+                text=target_text,
+                language=mapped_lang,
+                voice_clone_prompt=prompt,
+                max_new_tokens=max_new_tokens,
+                do_sample=do_sample,
+                top_p=top_p,
+                top_k=top_k,
+                temperature=temperature,
+                repetition_penalty=repetition_penalty,
+            )
+        else:
+            audio_tuple = _audio_to_tuple(reference_audio)
+            wavs, sr = model.generate_voice_clone(
+                text=target_text,
+                language=mapped_lang,
+                ref_audio=audio_tuple,
+                ref_text=reference_text.strip() if reference_text and reference_text.strip() else None,
+                x_vector_only_mode=bool(x_vector_only),
+                max_new_tokens=max_new_tokens,
+                do_sample=do_sample,
+                top_p=top_p,
+                top_k=top_k,
+                temperature=temperature,
+                repetition_penalty=repetition_penalty,
+            )
     audio = _to_comfy_audio(wavs, sr)
     if unload_models:
         _MODEL_CACHE.clear()
         model_management.soft_empty_cache()
+        try:
+            import gc
+            gc.collect()
+            gc.collect()
+        except Exception:
+            pass
     return (audio,)
 
 
@@ -533,24 +729,25 @@ class Qwen3TTSCustomVoiceBasic:
     @classmethod
     def INPUT_TYPES(cls):
         return {
-            "required": {
-                "text": ("STRING", {"multiline": True, "default": "Hello from Qwen3-TTS.", "tooltip": "Text to synthesize"}),
-                "speaker": (SPEAKER_CHOICES, {"default": "Ryan"}),
-                "model_size": (["0.6B", "1.7B"], {"default": "1.7B"}),
-                "language": (LANGUAGE_CHOICES, {"default": "Auto"}),
-            },
-            "optional": {
-                "instruct": ("STRING", {"multiline": True, "default": "", "tooltip": "Style instruction"}),
-                "seed": ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff}),
-            },
+            "required": OrderedDict([
+                ("text", ("STRING", {"multiline": True, "default": "Hello from Qwen3-TTS.", "tooltip": "Text to synthesize"})),
+                ("speaker", (SPEAKER_CHOICES, {"default": "Ryan"})),
+                ("model_size", (["0.6B", "1.7B"], {"default": "1.7B"})),
+                ("language", (LANGUAGE_CHOICES, {"default": "Auto"})),
+            ]),
+            "optional": OrderedDict([
+                ("instruct", ("STRING", {"multiline": True, "default": "", "tooltip": "Style instruction"})),
+                ("unload_models", ("BOOLEAN", {"default": True, "tooltip": "Unload cached models after generation"})),
+                ("seed", ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff})),
+            ]),
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("AUDIO",)
+    RETURN_NAMES = ("audio",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
+    CATEGORY = "🧪AILab/🎙️QwenTTS"
 
-    def generate(self, text, speaker, model_size, language, instruct="", seed=-1):
+    def generate(self, text, speaker, model_size, language, instruct="", unload_models=True, seed=-1):
         return _custom_voice_generate(
             text=text,
             speaker=speaker,
@@ -566,7 +763,7 @@ class Qwen3TTSCustomVoiceBasic:
             top_k=50,
             temperature=0.9,
             repetition_penalty=1.0,
-            unload_models=False,
+            unload_models=unload_models,
         )
 
 
@@ -574,33 +771,34 @@ class Qwen3TTSCustomVoiceAdvanced:
     @classmethod
     def INPUT_TYPES(cls):
         return {
-            "required": {
-                "text": ("STRING", {"multiline": True, "default": "Hello from Qwen3-TTS.", "tooltip": "Text to synthesize"}),
-                "speaker": (SPEAKER_CHOICES, {"default": "Ryan"}),
-                "model_size": (["0.6B", "1.7B"], {"default": "1.7B"}),
-                "device": (_available_devices(), {"default": "auto"}),
-                "precision": (["bf16", "fp16", "fp32"], {"default": "bf16"}),
-                "language": (LANGUAGE_CHOICES, {"default": "Auto"}),
-            },
-            "optional": {
-                "instruct": ("STRING", {"multiline": True, "default": "", "tooltip": "Style instruction"}),
-                "max_new_tokens": ("INT", {"default": 2048, "min": 256, "max": 4096, "step": 256}),
-                "do_sample": ("BOOLEAN", {"default": True}),
-                "top_p": ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.05}),
-                "top_k": ("INT", {"default": 50, "min": 0, "max": 200, "step": 1}),
-                "temperature": ("FLOAT", {"default": 0.9, "min": 0.1, "max": 2.0, "step": 0.05}),
-                "repetition_penalty": ("FLOAT", {"default": 1.0, "min": 0.5, "max": 2.0, "step": 0.05}),
-                "unload_models": ("BOOLEAN", {"default": False, "tooltip": "Unload cached models after generation"}),
-                "seed": ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff}),
-            },
+            "required": OrderedDict([
+                ("text", ("STRING", {"multiline": True, "default": "Hello from Qwen3-TTS.", "tooltip": "Text to synthesize"})),
+                ("speaker", (SPEAKER_CHOICES, {"default": "Ryan"})),
+                ("model_size", (["0.6B", "1.7B"], {"default": "1.7B"})),
+                ("device", (_available_devices(), {"default": "auto"})),
+                ("precision", (["bf16", "fp16", "fp32"], {"default": "bf16"})),
+                ("language", (LANGUAGE_CHOICES, {"default": "Auto"})),
+            ]),
+            "optional": OrderedDict([
+                ("instruct", ("STRING", {"multiline": True, "default": "", "tooltip": "Style instruction"})),
+                ("max_new_tokens", ("INT", {"default": 2048, "min": 256, "max": 4096, "step": 256})),
+                ("do_sample", ("BOOLEAN", {"default": False})),
+                ("top_p", ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.05})),
+                ("top_k", ("INT", {"default": 50, "min": 0, "max": 200, "step": 1})),
+                ("temperature", ("FLOAT", {"default": 0.9, "min": 0.1, "max": 2.0, "step": 0.05})),
+                ("repetition_penalty", ("FLOAT", {"default": 1.0, "min": 0.5, "max": 2.0, "step": 0.05})),
+                ("attention", (ATTENTION_OPTIONS, {"default": "auto"})),
+                ("unload_models", ("BOOLEAN", {"default": True, "tooltip": "Unload cached models after generation"})),
+                ("seed", ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff})),
+            ]),
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("AUDIO",)
+    RETURN_NAMES = ("audio",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
+    CATEGORY = "🧪AILab/🎙️QwenTTS"
 
-    def generate(self, text, speaker, model_size, device, precision, language, instruct="", seed=-1, max_new_tokens=2048, do_sample=True, top_p=0.9, top_k=50, temperature=0.9, repetition_penalty=1.0, unload_models=False):
+    def generate(self, text, speaker, model_size, device, precision, language, instruct="", max_new_tokens=2048, do_sample=True, top_p=0.9, top_k=50, temperature=0.9, repetition_penalty=1.0, attention="auto", unload_models=True, seed=-1):
         return _custom_voice_generate(
             text=text,
             speaker=speaker,
@@ -616,6 +814,7 @@ class Qwen3TTSCustomVoiceAdvanced:
             top_k=top_k,
             temperature=temperature,
             repetition_penalty=repetition_penalty,
+            attention=attention,
             unload_models=unload_models,
         )
 
@@ -624,23 +823,24 @@ class Qwen3TTSVoiceDesignBasic:
     @classmethod
     def INPUT_TYPES(cls):
         return {
-            "required": {
-                "text": ("STRING", {"multiline": True, "default": "Hello from Qwen3-TTS VoiceDesign.", "tooltip": "Text to synthesize"}),
-                "instruct": ("STRING", {"multiline": True, "default": "A warm, gentle female voice.", "tooltip": "Voice description"}),
-                "model_size": (["1.7B"], {"default": "1.7B"}),
-                "language": (LANGUAGE_CHOICES, {"default": "Auto"}),
-            },
-            "optional": {
-                "seed": ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff}),
-            },
+            "required": OrderedDict([
+                ("text", ("STRING", {"multiline": True, "default": "Hello from Qwen3-TTS VoiceDesign.", "tooltip": "Text to synthesize"})),
+                ("instruct", ("STRING", {"multiline": True, "default": "A warm, gentle female voice.", "tooltip": "Voice description"})),
+                ("model_size", (["1.7B"], {"default": "1.7B"})),
+                ("language", (LANGUAGE_CHOICES, {"default": "Auto"})),
+            ]),
+            "optional": OrderedDict([
+                ("unload_models", ("BOOLEAN", {"default": True, "tooltip": "Unload cached models after generation"})),
+                ("seed", ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff})),
+            ]),
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("AUDIO",)
+    RETURN_NAMES = ("audio",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
+    CATEGORY = "🧪AILab/🎙️QwenTTS"
 
-    def generate(self, text, instruct, model_size, language, seed=-1):
+    def generate(self, text, instruct, model_size, language, unload_models=True, seed=-1):
         return _voice_design_generate(
             text=text,
             instruct=instruct,
@@ -655,7 +855,7 @@ class Qwen3TTSVoiceDesignBasic:
             top_k=50,
             temperature=0.9,
             repetition_penalty=1.0,
-            unload_models=False,
+            unload_models=unload_models,
         )
 
 
@@ -663,32 +863,33 @@ class Qwen3TTSVoiceDesignAdvanced:
     @classmethod
     def INPUT_TYPES(cls):
         return {
-            "required": {
-                "text": ("STRING", {"multiline": True, "default": "Hello from Qwen3-TTS VoiceDesign.", "tooltip": "Text to synthesize"}),
-                "instruct": ("STRING", {"multiline": True, "default": "A warm, gentle female voice.", "tooltip": "Voice description"}),
-                "model_size": (["1.7B"], {"default": "1.7B"}),
-                "device": (_available_devices(), {"default": "auto"}),
-                "precision": (["bf16", "fp16", "fp32"], {"default": "bf16"}),
-                "language": (LANGUAGE_CHOICES, {"default": "Auto"}),
-            },
-            "optional": {
-                "max_new_tokens": ("INT", {"default": 2048, "min": 256, "max": 4096, "step": 256}),
-                "do_sample": ("BOOLEAN", {"default": True}),
-                "top_p": ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.05}),
-                "top_k": ("INT", {"default": 50, "min": 0, "max": 200, "step": 1}),
-                "temperature": ("FLOAT", {"default": 0.9, "min": 0.1, "max": 2.0, "step": 0.05}),
-                "repetition_penalty": ("FLOAT", {"default": 1.0, "min": 0.5, "max": 2.0, "step": 0.05}),
-                "unload_models": ("BOOLEAN", {"default": False}),
-                "seed": ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff}),
-            },
+            "required": OrderedDict([
+                ("text", ("STRING", {"multiline": True, "default": "Hello from Qwen3-TTS VoiceDesign.", "tooltip": "Text to synthesize"})),
+                ("instruct", ("STRING", {"multiline": True, "default": "A warm, gentle female voice.", "tooltip": "Voice description"})),
+                ("model_size", (["1.7B"], {"default": "1.7B"})),
+                ("device", (_available_devices(), {"default": "auto"})),
+                ("precision", (["bf16", "fp16", "fp32"], {"default": "bf16"})),
+                ("language", (LANGUAGE_CHOICES, {"default": "Auto"})),
+            ]),
+            "optional": OrderedDict([
+                ("max_new_tokens", ("INT", {"default": 2048, "min": 256, "max": 4096, "step": 256})),
+                ("do_sample", ("BOOLEAN", {"default": False})),
+                ("top_p", ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.05})),
+                ("top_k", ("INT", {"default": 50, "min": 0, "max": 200, "step": 1})),
+                ("temperature", ("FLOAT", {"default": 0.9, "min": 0.1, "max": 2.0, "step": 0.05})),
+                ("repetition_penalty", ("FLOAT", {"default": 1.0, "min": 0.5, "max": 2.0, "step": 0.05})),
+                ("attention", (ATTENTION_OPTIONS, {"default": "auto"})),
+                ("unload_models", ("BOOLEAN", {"default": True})),
+                ("seed", ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff})),
+            ]),
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("AUDIO",)
+    RETURN_NAMES = ("audio",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
+    CATEGORY = "🧪AILab/🎙️QwenTTS"
 
-    def generate(self, text, instruct, model_size, device, precision, language, seed=-1, max_new_tokens=2048, do_sample=True, top_p=0.9, top_k=50, temperature=0.9, repetition_penalty=1.0, unload_models=False):
+    def generate(self, text, instruct, model_size, device, precision, language, max_new_tokens=2048, do_sample=True, top_p=0.9, top_k=50, temperature=0.9, repetition_penalty=1.0, attention="auto", unload_models=True, seed=-1):
         return _voice_design_generate(
             text=text,
             instruct=instruct,
@@ -703,6 +904,7 @@ class Qwen3TTSVoiceDesignAdvanced:
             top_k=top_k,
             temperature=temperature,
             repetition_penalty=repetition_penalty,
+            attention=attention,
             unload_models=unload_models,
         )
 
@@ -711,25 +913,27 @@ class Qwen3TTSVoiceCloneBasic:
     @classmethod
     def INPUT_TYPES(cls):
         return {
-            "required": {
-                "reference_audio": ("AUDIO", {"tooltip": "Reference audio for cloning"}),
-                "target_text": ("STRING", {"multiline": True, "default": "Hello, this is a cloned voice.", "tooltip": "Text to speak"}),
-                "model_size": (["0.6B", "1.7B"], {"default": "0.6B"}),
-                "language": (LANGUAGE_CHOICES, {"default": "Auto"}),
-            },
-            "optional": {
-                "reference_text": ("STRING", {"multiline": True, "default": "", "tooltip": "Transcript of reference audio"}),
-                "x_vector_only": ("BOOLEAN", {"default": False, "tooltip": "Skip ref_text by using speaker embedding only"}),
-                "seed": ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff}),
-            },
+            "required": OrderedDict([
+                ("target_text", ("STRING", {"multiline": True, "default": "Hello, this is a cloned voice.", "tooltip": "Text to speak"})),
+                ("model_size", (["0.6B", "1.7B"], {"default": "1.7B"})),
+                ("language", (LANGUAGE_CHOICES, {"default": "Auto"})),
+            ]),
+            "optional": OrderedDict([
+                ("reference_audio", ("AUDIO", {"tooltip": "Reference audio for cloning (not needed if voice is provided)"})),
+                ("reference_text", ("STRING", {"multiline": True, "default": "", "tooltip": "Transcript of reference audio"})),
+                ("x_vector_only", ("BOOLEAN", {"default": False, "tooltip": "Skip ref_text by using speaker embedding only"})),
+                ("voice", ("VOICE",)),
+                ("unload_models", ("BOOLEAN", {"default": True, "tooltip": "Unload cached models after generation"})),
+                ("seed", ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff})),
+            ]),
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("AUDIO",)
+    RETURN_NAMES = ("audio",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
+    CATEGORY = "🧪AILab/🎙️QwenTTS"
 
-    def generate(self, reference_audio, target_text, model_size, language, reference_text="", x_vector_only=False, seed=-1):
+    def generate(self, target_text, model_size, language, reference_audio=None, reference_text="", x_vector_only=False, voice=None, unload_models=True, seed=-1):
         return _voice_clone_generate(
             reference_audio=reference_audio,
             target_text=target_text,
@@ -740,6 +944,7 @@ class Qwen3TTSVoiceCloneBasic:
             reference_text=reference_text,
             x_vector_only=x_vector_only,
             allow_empty_ref_text=True,
+            voice=voice,
             seed=seed,
             max_new_tokens=2048,
             do_sample=False,
@@ -747,7 +952,7 @@ class Qwen3TTSVoiceCloneBasic:
             top_k=50,
             temperature=0.9,
             repetition_penalty=1.0,
-            unload_models=False,
+            unload_models=unload_models,
         )
 
 
@@ -755,34 +960,36 @@ class Qwen3TTSVoiceCloneAdvanced:
     @classmethod
     def INPUT_TYPES(cls):
         return {
-            "required": {
-                "reference_audio": ("AUDIO", {"tooltip": "Reference audio for cloning"}),
-                "target_text": ("STRING", {"multiline": True, "default": "Hello, this is a cloned voice.", "tooltip": "Text to speak"}),
-                "model_size": (["0.6B", "1.7B"], {"default": "0.6B"}),
-                "device": (_available_devices(), {"default": "auto"}),
-                "precision": (["bf16", "fp16", "fp32"], {"default": "bf16"}),
-                "language": (LANGUAGE_CHOICES, {"default": "Auto"}),
-            },
-            "optional": {
-                "reference_text": ("STRING", {"multiline": True, "default": "", "tooltip": "Transcript of reference audio"}),
-                "x_vector_only": ("BOOLEAN", {"default": False, "tooltip": "Skip ref_text by using speaker embedding only"}),
-                "max_new_tokens": ("INT", {"default": 2048, "min": 256, "max": 4096, "step": 256}),
-                "do_sample": ("BOOLEAN", {"default": True}),
-                "top_p": ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.05}),
-                "top_k": ("INT", {"default": 50, "min": 0, "max": 200, "step": 1}),
-                "temperature": ("FLOAT", {"default": 0.9, "min": 0.1, "max": 2.0, "step": 0.05}),
-                "repetition_penalty": ("FLOAT", {"default": 1.0, "min": 0.5, "max": 2.0, "step": 0.05}),
-                "unload_models": ("BOOLEAN", {"default": False}),
-                "seed": ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff}),
-            },
+            "required": OrderedDict([
+                ("target_text", ("STRING", {"multiline": True, "default": "Hello, this is a cloned voice.", "tooltip": "Text to speak"})),
+                ("model_size", (["0.6B", "1.7B"], {"default": "1.7B"})),
+                ("device", (_available_devices(), {"default": "auto"})),
+                ("precision", (["bf16", "fp16", "fp32"], {"default": "bf16"})),
+                ("language", (LANGUAGE_CHOICES, {"default": "Auto"})),
+            ]),
+            "optional": OrderedDict([
+                ("reference_audio", ("AUDIO", {"tooltip": "Reference audio for cloning (not needed if voice is provided)"})),
+                ("reference_text", ("STRING", {"multiline": True, "default": "", "tooltip": "Transcript of reference audio"})),
+                ("x_vector_only", ("BOOLEAN", {"default": False, "tooltip": "Skip ref_text by using speaker embedding only"})),
+                ("voice", ("VOICE",)),
+                ("max_new_tokens", ("INT", {"default": 2048, "min": 256, "max": 4096, "step": 256})),
+                ("do_sample", ("BOOLEAN", {"default": False})),
+                ("top_p", ("FLOAT", {"default": 0.9, "min": 0.0, "max": 1.0, "step": 0.05})),
+                ("top_k", ("INT", {"default": 50, "min": 0, "max": 200, "step": 1})),
+                ("temperature", ("FLOAT", {"default": 0.9, "min": 0.1, "max": 2.0, "step": 0.05})),
+                ("repetition_penalty", ("FLOAT", {"default": 1.0, "min": 0.5, "max": 2.0, "step": 0.05})),
+                ("attention", (ATTENTION_OPTIONS, {"default": "auto"})),
+                ("unload_models", ("BOOLEAN", {"default": True})),
+                ("seed", ("INT", {"default": -1, "min": -1, "max": 0xffffffffffffffff})),
+            ]),
         }
 
     RETURN_TYPES = ("AUDIO",)
-    RETURN_NAMES = ("AUDIO",)
+    RETURN_NAMES = ("audio",)
     FUNCTION = "generate"
-    CATEGORY = "🧪AILab/🔊TTS/🎙️QwenTTS" 
+    CATEGORY = "🧪AILab/🎙️QwenTTS"
 
-    def generate(self, reference_audio, target_text, model_size, device, precision, language, reference_text="", x_vector_only=False, seed=-1, max_new_tokens=2048, do_sample=True, top_p=0.9, top_k=50, temperature=0.9, repetition_penalty=1.0, unload_models=False):
+    def generate(self, target_text, model_size, device, precision, language, reference_audio=None, reference_text="", x_vector_only=False, voice=None, max_new_tokens=2048, do_sample=True, top_p=0.9, top_k=50, temperature=0.9, repetition_penalty=1.0, attention="auto", unload_models=True, seed=-1):
         return _voice_clone_generate(
             reference_audio=reference_audio,
             target_text=target_text,
@@ -793,6 +1000,7 @@ class Qwen3TTSVoiceCloneAdvanced:
             reference_text=reference_text,
             x_vector_only=x_vector_only,
             allow_empty_ref_text=False,
+            voice=voice,
             seed=seed,
             max_new_tokens=max_new_tokens,
             do_sample=do_sample,
@@ -800,6 +1008,7 @@ class Qwen3TTSVoiceCloneAdvanced:
             top_k=top_k,
             temperature=temperature,
             repetition_penalty=repetition_penalty,
+            attention=attention,
             unload_models=unload_models,
         )
 
@@ -814,10 +1023,10 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "AILab_Qwen3TTSCustomVoice": "Qwen3 TTS CustomVoice",
-    "AILab_Qwen3TTSCustomVoice_Advanced": "Qwen3 TTS CustomVoice (Advanced)",
-    "AILab_Qwen3TTSVoiceDesign": "Qwen3 TTS VoiceDesign",
-    "AILab_Qwen3TTSVoiceDesign_Advanced": "Qwen3 TTS VoiceDesign (Advanced)",
-    "AILab_Qwen3TTSVoiceClone": "Qwen3 TTS VoiceClone",
-    "AILab_Qwen3TTSVoiceClone_Advanced": "Qwen3 TTS VoiceClone (Advanced)",
+    "AILab_Qwen3TTSCustomVoice": "Custom Voice (QwenTTS)",
+    "AILab_Qwen3TTSCustomVoice_Advanced": "Custom Voice (QwenTTS) Advanced",
+    "AILab_Qwen3TTSVoiceDesign": "Voice Design (QwenTTS)",
+    "AILab_Qwen3TTSVoiceDesign_Advanced": "Voice Design (QwenTTS) Advanced",
+    "AILab_Qwen3TTSVoiceClone": "Voice Clone (QwenTTS)",
+    "AILab_Qwen3TTSVoiceClone_Advanced": "Voice Clone (QwenTTS) Advanced",
 }
