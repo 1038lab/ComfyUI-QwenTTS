@@ -9,7 +9,7 @@ soundfile>=0.13.1
 tiktoken>=0.12.0
 torch>=2.9.1
 torchaudio>=2.9.1
-transformers>=4.57.0
+transformers>=4.57.3
 
 
 # flash-attn>=2.8.0 (optional)  # CUDA-only, speeds up attention
