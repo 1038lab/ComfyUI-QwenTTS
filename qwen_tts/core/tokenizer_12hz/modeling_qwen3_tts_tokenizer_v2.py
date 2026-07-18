@@ -557,18 +557,14 @@ class Qwen3TTSTokenizerV2DecoderTransformerModel(Qwen3TTSTokenizerV2DecoderPreTr
         # It may already have been prepared by e.g. `generate`
         if not isinstance(causal_mask_mapping := attention_mask, dict):
             # Prepare mask arguments
+            post_harmonize_input_embed = int(transformers.__version__.split('.')[0]) >= 5 and int(transformers.__version__.split('.')[1]) >= 2
             mask_kwargs = {
                 "config": self.config,
                 "attention_mask": attention_mask,
                 "past_key_values": past_key_values,
                 "position_ids": position_ids,
-                **({
-                    "input_embeds": inputs_embeds,
-                    "cache_position": cache_position
-                    } if transformers.__version__[0] <= '4'
-                   else {
-                        "inputs_embeds": inputs_embeds,
-                   })
+                **({ "cache_position": cache_position } if int(transformers.__version__.split('.')[0]) <= 4 else {}),
+                **({ "inputs_embeds": inputs_embeds } if post_harmonize_input_embed else { "input_embeds": inputs_embeds })
             }
             # Create the masks
             causal_mask_mapping = {

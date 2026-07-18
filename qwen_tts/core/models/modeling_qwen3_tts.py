@@ -1127,18 +1127,14 @@ class Qwen3TTSTalkerCodePredictorModel(Qwen3TTSPreTrainedModel):
         # It may already have been prepared by e.g. `generate`
         if not isinstance(causal_mask_mapping := attention_mask, dict):
             # Prepare mask arguments
+            post_harmonize_input_embed = int(transformers.__version__.split('.')[0]) >= 5 and int(transformers.__version__.split('.')[1]) >= 2
             mask_kwargs = {
                 "config": self.config,
                 "attention_mask": attention_mask,
                 "past_key_values": past_key_values,
-                **({
-                    "input_embeds": inputs_embeds,
-                    "cache_position": cache_position
-                    } if transformers.__version__[0] <= '4'
-                   else {
-                        "inputs_embeds": inputs_embeds,
-                        "position_ids": position_ids,
-                   })
+                "position_ids": position_ids,
+                **({ "cache_position": cache_position } if int(transformers.__version__.split('.')[0]) <= 4 else {}),
+                **({ "inputs_embeds": inputs_embeds } if post_harmonize_input_embed else { "input_embeds": inputs_embeds })
             }
             # Create the masks
             causal_mask_mapping = {
@@ -1550,18 +1546,14 @@ class Qwen3TTSTalkerModel(Qwen3TTSTalkerTextPreTrainedModel):
             text_position_ids = position_ids[0]
         
         mask_function = create_causal_mask if self.config.sliding_window is None else create_sliding_window_causal_mask
+        post_harmonize_input_embed = int(transformers.__version__.split('.')[0]) >= 5 and int(transformers.__version__.split('.')[1]) >= 2
         causal_mask = mask_function(
             config=self.config,
             attention_mask=attention_mask,
             past_key_values=past_key_values,
             position_ids=text_position_ids,
-                **({
-                    "input_embeds": inputs_embeds,
-                    "cache_position": cache_position
-                    } if transformers.__version__[0] <= '4'
-                   else {
-                        "inputs_embeds": inputs_embeds,
-                   })
+            **(dict(cache_position=cache_position) if int(transformers.__version__.split('.')[0]) <= 4 else dict()),
+            **(dict(inputs_embeds=inputs_embeds) if post_harmonize_input_embed else dict(input_embeds=inputs_embeds))
         )
 
         hidden_states = inputs_embeds
