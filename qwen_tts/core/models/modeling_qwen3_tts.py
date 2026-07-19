@@ -25,6 +25,7 @@ from huggingface_hub import snapshot_download
 from librosa.filters import mel as librosa_mel_fn
 from torch import nn
 from torch.nn import functional as F
+import transformers
 from transformers.activations import ACT2FN
 from transformers.cache_utils import Cache, DynamicCache
 from transformers.generation import GenerationMixin
@@ -42,6 +43,7 @@ from transformers.modeling_utils import (ALL_ATTENTION_FUNCTIONS,
 from transformers.processing_utils import Unpack
 from transformers.utils import can_return_tuple, logging
 from transformers.utils.hub import cached_file
+import transformers.initialization as init
 
 from ...inference.qwen3_tts_tokenizer import Qwen3TTSTokenizer
 from .configuration_qwen3_tts import (Qwen3TTSConfig,
@@ -50,6 +52,21 @@ from .configuration_qwen3_tts import (Qwen3TTSConfig,
                                       Qwen3TTSTalkerConfig)
 
 logger = logging.get_logger(__name__)
+
+
+def get_default_rope_inv_freq(config, device: torch.device):
+    base = getattr(config, "rope_theta", 10000.0)
+    
+    head_dim = getattr(config, "head_dim", None) 
+    if head_dim is None:
+        head_dim = getattr(config, "hidden_size", 0) // getattr(config, "num_attention_heads", 1)
+        
+    # Calculate inverse frequencies
+    inv_freq = 1.0 / (base ** (torch.arange(0, head_dim, 2, dtype=torch.int64).to(device=device, dtype=torch.float32) / head_dim))
+    
+    attention_scaling = 1.0 # Standard attention scaling
+    
+    return inv_freq, attention_scaling
 
 
 def download_weights_from_hf_specific(
@@ -479,21 +496,22 @@ class Qwen3TTSPreTrainedModel(PreTrainedModel):
     def _init_weights(self, module):
         # important: this ported version of Qwen2.5OmniThinker isn't meant for training from scratch - only
         # inference and fine-tuning - so the proper init weights code has been removed
+        super()._init_weights(module)
         std = self.config.initializer_range if hasattr(self.config, "initializer_range") else 0.02
 
         if isinstance(module, (nn.Linear, nn.Conv1d, nn.Conv3d, nn.ConvTranspose1d)):
-            module.weight.data.normal_(mean=0.0, std=std)
+            init.normal_(module.weight, mean=0.0, std=std)
             if module.bias is not None:
-                module.bias.data.zero_()
+                init.zeros_(module.bias)
         elif isinstance(module, nn.Embedding):
-            module.weight.data.normal_(mean=0.0, std=std)
-            if module.padding_idx is not None:
-                module.weight.data[module.padding_idx].zero_()
+            init.normal_(module.weight, mean=0.0, std=std)
+            if module.padding_idx is not None and not getattr(module.weight, "_is_hf_initialized", False):
+                init.zeros_(module.weight[module.padding_idx])
         elif isinstance(module, nn.LayerNorm):
             if module.weight is not None:
-                module.weight.data.fill_(1.0)
+                init.ones_(module.weight)
             if module.bias is not None:
-                module.bias.data.zero_()
+                init.zeros_(module.bias)
 
 
 class Qwen3TTSTalkerTextPreTrainedModel(PreTrainedModel):
@@ -511,17 +529,18 @@ class Qwen3TTSTalkerTextPreTrainedModel(PreTrainedModel):
     _supports_attention_backend = True
 
     def _init_weights(self, module):
+        super()._init_weights(module)
         std = self.config.initializer_range
         if isinstance(module, nn.Linear):
-            module.weight.data.normal_(mean=0.0, std=std)
+            init.normal_(module.weight, mean=0.0, std=std)
             if module.bias is not None:
-                module.bias.data.zero_()
+                init.zeros_(module.bias)
         elif isinstance(module, nn.Embedding):
-            module.weight.data.normal_(mean=0.0, std=std)
-            if module.padding_idx is not None:
-                module.weight.data[module.padding_idx].zero_()
+            init.normal_(module.weight, mean=0.0, std=std)
+            if module.padding_idx is not None and not getattr(module.weight, "_is_hf_initialized", False):
+                init.zeros_(module.weight[module.padding_idx])
         elif isinstance(module, Qwen3TTSRMSNorm):
-            module.weight.data.fill_(1.0)
+            init.ones_(module.weight)
 
 
 class Qwen3TTSTalkerRotaryEmbedding(nn.Module):
@@ -536,11 +555,17 @@ class Qwen3TTSTalkerRotaryEmbedding(nn.Module):
         self.original_max_seq_len = config.max_position_embeddings
 
         self.config = config
-        self.rope_init_fn = ROPE_INIT_FUNCTIONS[self.rope_type]
+        self.rope_init_fn = self.compute_default_rope_parameters
+        if self.rope_type != 'default':
+            self.rope_init_fn = ROPE_INIT_FUNCTIONS[self.rope_type]
 
         inv_freq, self.attention_scaling = self.rope_init_fn(self.config, device)
         self.register_buffer("inv_freq", inv_freq, persistent=False)
-        self.original_inv_freq = self.inv_freq
+        self.register_buffer("original_inv_freq", inv_freq.clone(), persistent=False)
+
+    @staticmethod
+    def compute_default_rope_parameters(config: Qwen3TTSTalkerConfig, device=None):
+        return get_default_rope_inv_freq(config, device)
 
     @torch.no_grad()
     @dynamic_rope_update  # power user: used with advanced RoPE types (e.g. dynamic rope)
@@ -571,11 +596,17 @@ class Qwen3TTSRotaryEmbedding(nn.Module):
         self.original_max_seq_len = config.max_position_embeddings
 
         self.config = config
-        self.rope_init_fn = ROPE_INIT_FUNCTIONS[self.rope_type]
+        self.rope_init_fn = self.compute_default_rope_parameters
+        if self.rope_type != 'default':
+            self.rope_init_fn = ROPE_INIT_FUNCTIONS[self.rope_type]
 
         inv_freq, self.attention_scaling = self.rope_init_fn(self.config, device)
         self.register_buffer("inv_freq", inv_freq, persistent=False)
         self.original_inv_freq = self.inv_freq
+        
+    @staticmethod
+    def compute_default_rope_parameters(config: Qwen3TTSConfig, device=None):
+        return get_default_rope_inv_freq(config, device)
 
     @torch.no_grad()
     @dynamic_rope_update  # power user: used with advanced RoPE types (e.g. dynamic rope)
@@ -782,7 +813,7 @@ class Qwen3TTSTalkerAttention(nn.Module):
 
         if past_key_values is not None:
             # sin and cos are specific to RoPE models; cache_position needed for the static cache
-            cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
+            cache_kwargs = {"sin": sin, "cos": cos}
             key_states, value_states = past_key_values.update(key_states, value_states, self.layer_idx, cache_kwargs)
 
         attention_interface: Callable = eager_attention_forward
@@ -935,7 +966,7 @@ class Qwen3TTSAttention(nn.Module):
 
         if past_key_values is not None:
             # sin and cos are specific to RoPE models; cache_position needed for the static cache
-            cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
+            cache_kwargs = {"sin": sin, "cos": cos}
             key_states, value_states = past_key_values.update(key_states, value_states, self.layer_idx, cache_kwargs)
 
         attention_interface: Callable = eager_attention_forward
@@ -994,7 +1025,6 @@ class Qwen3TTSDecoderLayer(GradientCheckpointingLayer):
             past_key_values=past_key_values,
             output_attentions=output_attentions,
             use_cache=use_cache,
-            cache_position=cache_position,
             position_embeddings=position_embeddings,
             **kwargs,
         )
@@ -1090,17 +1120,22 @@ class Qwen3TTSTalkerCodePredictorModel(Qwen3TTSPreTrainedModel):
             )
 
         if position_ids is None:
-            position_ids = cache_position.unsqueeze(0)
+            past_seen_tokens = past_key_values.get_seq_length() if past_key_values is not None else 0
+            position_ids = torch.arange(
+                past_seen_tokens, past_seen_tokens + inputs_embeds.shape[1], device=inputs_embeds.device
+            ).unsqueeze(0)
 
         # It may already have been prepared by e.g. `generate`
         if not isinstance(causal_mask_mapping := attention_mask, dict):
             # Prepare mask arguments
+            post_harmonize_input_embed = int(transformers.__version__.split('.')[0]) >= 5 and int(transformers.__version__.split('.')[1]) >= 2
             mask_kwargs = {
                 "config": self.config,
-                "input_embeds": inputs_embeds,
                 "attention_mask": attention_mask,
-                "cache_position": cache_position,
                 "past_key_values": past_key_values,
+                "position_ids": position_ids,
+                **({ "cache_position": cache_position } if int(transformers.__version__.split('.')[0]) <= 4 else {}),
+                **({ "inputs_embeds": inputs_embeds } if post_harmonize_input_embed else { "input_embeds": inputs_embeds })
             }
             # Create the masks
             causal_mask_mapping = {
@@ -1431,7 +1466,7 @@ class Qwen3TTSTalkerModel(Qwen3TTSTalkerTextPreTrainedModel):
 
     def __init__(self, config):
         super().__init__(config)
-        self.padding_idx = config.pad_token_id
+        self.padding_idx = getattr(config, "pad_token_id", None)
         self.vocab_size = config.vocab_size
         self.layers = nn.ModuleList(
             [Qwen3TTSTalkerDecoderLayer(config, layer_idx) for layer_idx in range(config.num_hidden_layers)]
@@ -1498,7 +1533,10 @@ class Qwen3TTSTalkerModel(Qwen3TTSTalkerTextPreTrainedModel):
 
         # the hard coded `3` is for temporal, height and width.
         if position_ids is None:
-            position_ids = cache_position.view(1, 1, -1).expand(3, inputs_embeds.shape[0], -1)
+            past_seen_tokens = past_key_values.get_seq_length() if past_key_values is not None else 0
+            position_ids = torch.arange(
+                past_seen_tokens, past_seen_tokens + inputs_embeds.shape[1], device=inputs_embeds.device
+            ).view(1, 1, -1).expand(3, inputs_embeds.shape[0], -1)
         elif position_ids.ndim == 2:
             position_ids = position_ids[None, ...].expand(3, position_ids.shape[0], -1)
 
@@ -1509,13 +1547,14 @@ class Qwen3TTSTalkerModel(Qwen3TTSTalkerTextPreTrainedModel):
             text_position_ids = position_ids[0]
         
         mask_function = create_causal_mask if self.config.sliding_window is None else create_sliding_window_causal_mask
+        post_harmonize_input_embed = int(transformers.__version__.split('.')[0]) >= 5 and int(transformers.__version__.split('.')[1]) >= 2
         causal_mask = mask_function(
             config=self.config,
-            input_embeds=inputs_embeds,
             attention_mask=attention_mask,
-            cache_position=cache_position,
             past_key_values=past_key_values,
             position_ids=text_position_ids,
+            **(dict(cache_position=cache_position) if int(transformers.__version__.split('.')[0]) <= 4 else dict()),
+            **(dict(inputs_embeds=inputs_embeds) if post_harmonize_input_embed else dict(input_embeds=inputs_embeds))
         )
 
         hidden_states = inputs_embeds
@@ -1693,9 +1732,12 @@ class Qwen3TTSTalkerForConditionalGeneration(Qwen3TTSTalkerTextPreTrainedModel, 
                 inputs_embeds = inputs_embeds + tts_pad_embed
         if attention_mask is not None:
             if (
-                cache_position is None
-                or (cache_position is not None and cache_position[0] == 0)
-                or self.rope_deltas is None
+                input_ids is None or
+                position_ids is None or
+                self.rope_deltas is None
+                # cache_position is None
+                # or (cache_position is not None and cache_position[0] == 0)
+                # or self.rope_deltas is None
             ):
                 delta0 = (1 - attention_mask).sum(dim=-1).unsqueeze(1)
                 position_ids, rope_deltas = self.get_rope_index(
@@ -1705,8 +1747,9 @@ class Qwen3TTSTalkerForConditionalGeneration(Qwen3TTSTalkerTextPreTrainedModel, 
                 self.rope_deltas = rope_deltas
             else:
                 batch_size, seq_length = input_ids.shape
-                delta = cache_position[0] + self.rope_deltas if cache_position is not None else 0
-                position_ids = torch.arange(seq_length, device=input_ids.device)
+                delta = self.rope_deltas if generation_step >= 0 else 0
+                # delta = cache_position[0] + self.rope_deltas if cache_position is not None else 0
+                # position_ids = torch.arange(seq_length, device=input_ids.device)
                 position_ids = position_ids.view(1, -1).expand(batch_size, -1)
                 position_ids = position_ids.add(delta)
                 position_ids = position_ids.unsqueeze(0).expand(3, -1, -1)

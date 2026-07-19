@@ -252,7 +252,10 @@ class Qwen3TTSTalkerCodePredictorConfig(PretrainedConfig):
                 else "full_attention"
                 for i in range(self.num_hidden_layers)
             ]
-        layer_type_validation(self.layer_types)
+        if hasattr(self, 'validate_layer_type'):
+            self.validate_layer_type()
+        else:
+            layer_type_validation(self.layer_types)
         self.num_code_groups = num_code_groups
 
 

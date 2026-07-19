@@ -23,6 +23,7 @@ import torch
 from torch import nn
 from torch.nn import Parameter
 from torch.nn import functional as F
+import transformers
 from transformers import MimiConfig, MimiModel
 from transformers.activations import ACT2FN
 from transformers.cache_utils import Cache, DynamicCache
@@ -39,7 +40,7 @@ from transformers.modeling_utils import ALL_ATTENTION_FUNCTIONS, PreTrainedModel
 from transformers.processing_utils import Unpack
 from transformers.utils import ModelOutput, auto_docstring, logging
 from transformers.utils.deprecation import deprecate_kwarg
-from transformers.utils.generic import check_model_inputs
+# from transformers.utils.generic import check_model_inputs
 
 from .configuration_qwen3_tts_tokenizer_v2 import (
     Qwen3TTSTokenizerV2Config,
@@ -48,6 +49,20 @@ from .configuration_qwen3_tts_tokenizer_v2 import (
 
 logger = logging.get_logger(__name__)
 
+
+def get_default_rope_inv_freq(config, device):
+    base = getattr(config, "rope_theta", 10000.0)
+    
+    head_dim = getattr(config, "head_dim", None) 
+    if head_dim is None:
+        head_dim = getattr(config, "hidden_size", 0) // getattr(config, "num_attention_heads", 1)
+        
+    # Calculate inverse frequencies
+    inv_freq = 1.0 / (base ** (torch.arange(0, head_dim, 2, dtype=torch.int64).float().to(device) / head_dim))
+    
+    attention_scaling = 1.0 # Standard attention scaling
+    
+    return inv_freq, attention_scaling
 
 @dataclass
 @auto_docstring
@@ -256,11 +271,17 @@ class Qwen3TTSTokenizerV2DecoderRotatoryEmbedding(nn.Module):
         self.original_max_seq_len = config.max_position_embeddings
 
         self.config = config
-        self.rope_init_fn = ROPE_INIT_FUNCTIONS[self.rope_type]
+        self.rope_init_fn = self.compute_default_rope_parameters
+        if self.rope_type != 'default':
+            self.rope_init_fn = ROPE_INIT_FUNCTIONS[self.rope_type]
 
         inv_freq, self.attention_scaling = self.rope_init_fn(self.config, device)
         self.register_buffer("inv_freq", inv_freq, persistent=False)
         self.original_inv_freq = self.inv_freq
+        
+    @staticmethod
+    def compute_default_rope_parameters(config: Qwen3TTSTokenizerV2DecoderConfig, device=None):
+        return get_default_rope_inv_freq(config, device)
 
     @torch.no_grad()
     @dynamic_rope_update  # power user: used with advanced RoPE types (e.g. dynamic rope)
@@ -329,7 +350,7 @@ class Qwen3TTSTokenizerV2DecoderAttention(nn.Module):
 
         if past_key_values is not None:
             # sin and cos are specific to RoPE models; cache_position needed for the static cache
-            cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
+            cache_kwargs = {"sin": sin, "cos": cos}
             key_states, value_states = past_key_values.update(key_states, value_states, self.layer_idx, cache_kwargs)
 
         attention_interface: Callable = eager_attention_forward
@@ -495,7 +516,7 @@ class Qwen3TTSTokenizerV2DecoderTransformerModel(Qwen3TTSTokenizerV2DecoderPreTr
         # Initialize weights and apply final processing
         self.post_init()
 
-    @check_model_inputs()
+    # @check_model_inputs()
     @auto_docstring
     def forward(
         self,
@@ -528,18 +549,22 @@ class Qwen3TTSTokenizerV2DecoderTransformerModel(Qwen3TTSTokenizerV2DecoderPreTr
             )
 
         if position_ids is None:
-            position_ids = cache_position.unsqueeze(0)
+            past_seen_tokens = past_key_values.get_seq_length() if past_key_values is not None else 0
+            position_ids = torch.arange(
+                past_seen_tokens, past_seen_tokens + inputs_embeds.shape[1], device=inputs_embeds.device
+            ).unsqueeze(0)
 
         # It may already have been prepared by e.g. `generate`
         if not isinstance(causal_mask_mapping := attention_mask, dict):
             # Prepare mask arguments
+            post_harmonize_input_embed = int(transformers.__version__.split('.')[0]) >= 5 and int(transformers.__version__.split('.')[1]) >= 2
             mask_kwargs = {
                 "config": self.config,
-                "input_embeds": inputs_embeds,
                 "attention_mask": attention_mask,
-                "cache_position": cache_position,
                 "past_key_values": past_key_values,
                 "position_ids": position_ids,
+                **({ "cache_position": cache_position } if int(transformers.__version__.split('.')[0]) <= 4 else {}),
+                **({ "inputs_embeds": inputs_embeds } if post_harmonize_input_embed else { "input_embeds": inputs_embeds })
             }
             # Create the masks
             causal_mask_mapping = {
